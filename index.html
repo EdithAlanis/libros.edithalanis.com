@@ -26,7 +26,7 @@ a{text-decoration:none;color:inherit}
 <div class="topline"><span>Portal Editorial · Edith Alanis</span><span><b>Libros que se escriben todos los días</b></span></div>
 <header class="header">
   <a class="brand" href="#inicio"><span class="seal">EA</span><span><strong>Portal Editorial Edith Alanis</strong><small>Plataforma editorial continua</small></span></a>
-  <nav class="nav"><a href="#libros">Libros</a><a href="#autores">Autores</a><a href="#modelo">Suscripciones</a><button data-open="login">Entrar</button><button class="btn gold" data-open="registro">Inscribirme</button><a href="#administracion">Administración</a><a href="#modelo-lectura">Lectores y autores</a></nav>
+  <nav class="nav"><a href="#libros">Libros</a><a href="#autores">Autores</a><a href="#modelo">Suscripciones</a><button id="topSecureLogin" type="button" onclick="PortalAuth.showLogin('admin')">Entrar</button><button class="btn gold" data-open="registro">Inscribirme</button><a href="#administracion">Administración</a><a href="#modelo-lectura">Lectores y autores</a></nav>
 </header>
 <main>
 <section class="hero" id="inicio">
@@ -45,7 +45,7 @@ a{text-decoration:none;color:inherit}
   </div>
  </div>
 </section>
-<section class="stats"><div class="stat"><strong>200</strong><span>MXN · lector mensual</span></div><div class="stat"><strong>500</strong><span>MXN · autor mensual</span></div><div class="stat"><strong>500</strong><span>MXN · libro terminado</span></div><div class="stat"><strong>24/7</strong><span>Obras en evolución</span></div></section>
+<section class="stats"><div class="stat"><strong>100</strong><span>MXN · lector / 30 días</span></div><div class="stat"><strong>500</strong><span>MXN · autor mensual</span></div><div class="stat"><strong>500</strong><span>MXN · libro terminado</span></div><div class="stat"><strong>24/7</strong><span>Obras en evolución</span></div></section>
 <section class="section" id="libros">
  <div class="section-head"><div><span class="kicker">Biblioteca en movimiento</span><h2>Libros que se están escribiendo</h2><p class="section-intro">Cada obra conserva la fecha de sus avances. El lector sabe qué se publicó hoy y continúa exactamente desde el punto donde quedó.</p></div><button class="btn outline">Ver biblioteca completa</button></div>
  <div class="cards" id="bookGrid"></div>
@@ -56,7 +56,7 @@ a{text-decoration:none;color:inherit}
   <div class="form-demo"><h3>Panel editorial</h3><div class="field"><label>Seudónimo público</label><div class="fake">Luna del Valle</div></div><div class="field"><label>Libro activo</label><div class="fake">El mapa de los días invisibles</div></div><div class="field"><label>Escritura de hoy · 20/08/2026</label><div class="fake editor">La puerta estaba entreabierta cuando llegó. Había escrito sobre ella durante semanas, pero nunca había imaginado que aparecería exactamente así...</div></div><div class="actions"><button class="btn outline">Guardar borrador</button><button class="btn navy">Publicar avance</button></div></div>
  </div>
 </section>
-<section class="section" id="modelo"><span class="kicker">Modelo editorial</span><h2>Tres formas de participar</h2><p class="section-intro">Una estructura sencilla para leer, escribir y conservar la obra completa una vez terminada.</p><div class="pricing"><article class="price-card"><span class="label">Lector</span><strong>$200</strong><small>MXN / mes</small><p>Acceso a nuevos escritos. Cada página puede leerse antes de avanzar; una vez que se continúa, la anterior queda cerrada.</p><button class="btn navy" data-open="lector">Suscribirme</button></article><article class="price-card featured"><span class="label">Autor</span><strong>$500</strong><small>MXN / mes</small><p>Cuenta de autor, seudónimo público, varios libros, escritura diaria, historial de versiones y funciones de lectura.</p><button class="btn gold" data-open="autor" onclick="openPaymentRequest('Inscripción de autor · $500 MXN/mes')">Solicitar inscripción</button></article><article class="price-card"><span class="label">Libro terminado</span><strong>$500</strong><small>MXN / obra</small><p>PDF completo para uso personal, con folio de compra y aviso de prohibición de reproducción y distribución no autorizada.</p><button class="btn outline" data-buy>Comprar ejemplo</button></article></div></section>
+<section class="section" id="modelo"><span class="kicker">Modelo editorial</span><h2>Tres formas de participar</h2><p class="section-intro">Una estructura sencilla para leer, escribir y conservar la obra completa una vez terminada.</p><div class="pricing"><article class="price-card"><span class="label">Lector</span><strong>$100</strong><small>MXN / 30 días</small><p>Acceso a nuevos escritos. Cada página puede leerse antes de avanzar; una vez que se continúa, la anterior queda cerrada.</p><button class="btn navy" data-open="lector">Suscribirme</button></article><article class="price-card featured"><span class="label">Autor</span><strong>$500</strong><small>MXN / mes</small><p>Cuenta de autor, seudónimo público, varios libros, escritura diaria, historial de versiones y funciones de lectura.</p><button class="btn gold" data-open="autor" onclick="openPaymentRequest('Inscripción de autor · $500 MXN/mes')">Solicitar inscripción</button></article><article class="price-card"><span class="label">Libro terminado</span><strong>$500</strong><small>MXN / obra</small><p>PDF completo para uso personal, con folio de compra y aviso de prohibición de reproducción y distribución no autorizada.</p><button class="btn outline" data-buy>Comprar ejemplo</button></article></div></section>
 </main>
 
 
@@ -129,7 +129,7 @@ a{text-decoration:none;color:inherit}
     <article class="card">
       <h3>Usuarios de pago</h3>
       <p>Lectores y autores tendrán accesos independientes con <b>correo electrónico + NIP + contraseña</b>, activados después de confirmar el pago.</p>
-      <button class="btn primary" onclick="openAdminDemo()">Ver acceso administrativo</button>
+      <button class="btn primary" type="button" onclick="PortalAuth.showLogin('admin')">Acceso administrativo</button>
     </article>
   </div>
 </section>
@@ -163,7 +163,7 @@ document.addEventListener('click',e=>{if(e.target.matches('[data-close]'))closeM
  if(e.target.matches('[data-open]')){const type=e.target.dataset.open;if(type==='autor')authorForm();else if(type==='lector')readerForm();else if(type==='login')loginForm();else choiceForm();}
  if(e.target.matches('[data-read]'))readerDemo(Number(e.target.dataset.read));if(e.target.matches('[data-demo-reader]'))readerDemo(0);if(e.target.matches('[data-buy]'))buyDemo();});
 function choiceForm(){openModal(`<h2>¿Cómo quieres participar?</h2><p>Selecciona el tipo de cuenta.</p><div class="actions"><button class="btn navy" onclick="readerForm()">Lector · $100 / 30 días</button><button class="btn gold" onclick="authorForm()">Autor · $500/mes</button></div>`)}
-function readerForm(){openModal(`<h2>Inscripción de lector</h2><p>Lee las nuevas páginas de los libros activos y continúa siempre hacia adelante.</p><div class="grid-form"><input placeholder="Nombre completo"><input placeholder="Correo electrónico" type="email"><input placeholder="Teléfono"><input placeholder="Contraseña" type="password"><div class="wide legal"><input type="checkbox"> Acepto los términos de lectura y la suscripción de $200 MXN mensuales.</div><button class="btn navy wide">Continuar al pago</button></div>`)}
+function readerForm(){openModal(`<h2>Inscripción de lector</h2><p>Lee las nuevas páginas de los libros activos y continúa siempre hacia adelante.</p><div class="grid-form"><input placeholder="Nombre completo"><input placeholder="Correo electrónico" type="email"><input placeholder="Teléfono"><input placeholder="Contraseña" type="password"><div class="wide legal"><input type="checkbox"> Acepto los términos de lectura y la suscripción de $100 MXN por 30 días.</div><button class="btn navy wide">Continuar al pago</button></div>`)}
 function authorForm(){openModal(`<h2>Inscripción de autor</h2><p>Tus datos reales son administrativos; públicamente aparecerá tu seudónimo.</p><div class="grid-form"><input placeholder="Nombre(s)"><input placeholder="Apellidos"><input placeholder="Fecha de nacimiento" type="date"><input placeholder="Correo electrónico" type="email"><input placeholder="Teléfono"><input placeholder="País"><input placeholder="Estado / provincia"><input placeholder="Ciudad"><input class="wide" placeholder="Domicilio"><input placeholder="Código postal"><input placeholder="Seudónimo público"><input placeholder="Contraseña" type="password"><div class="wide legal"><input type="checkbox"> Confirmo que la información proporcionada es correcta y acepto las condiciones para autores y la suscripción de $500 MXN mensuales.</div><button class="btn navy wide">Continuar al pago</button></div>`)}
 function loginForm(){openModal(`<h2>Entrar</h2><div class="grid-form"><input class="wide" placeholder="Correo electrónico"><input class="wide" placeholder="Contraseña" type="password"><button class="btn navy wide">Ingresar</button></div>`)}
 let readerPage=0;
@@ -264,8 +264,8 @@ function closeAdminDemo(){
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script src="config.js?v=20260821-4"></script>
+<script src="app.js?v=20260821-4"></script>
 
 </body>
 </html>
