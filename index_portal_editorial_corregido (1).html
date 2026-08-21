@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal Editorial Edith Alanis</title>
+<meta name="description" content="Plataforma editorial de libros que se escriben cada día.">
+<style>
+:root{--navy:#0b1830;--navy2:#132746;--gold:#c7a04a;--paper:#fbf8f1;--ink:#172033;--muted:#6d7480;--line:#e6dfd1;--white:#fff;--cream:#f2ede3;--green:#2e7d5b;--shadow:0 18px 50px rgba(11,24,48,.12)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:#f7f7f5;color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+.topline{background:var(--navy);color:#dfe6f2;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:8px 4vw;display:flex;justify-content:space-between;gap:20px}.topline b{color:#f6ddb0}.header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.97);border-bottom:1px solid #e8e8e6;display:flex;align-items:center;justify-content:space-between;padding:14px 4vw;backdrop-filter:blur(10px)}
+.brand{display:flex;align-items:center;gap:12px}.seal{width:46px;height:46px;border-radius:50%;background:var(--navy);color:white;display:grid;place-items:center;font-family:Georgia,serif;font-size:17px;border:2px solid var(--gold);box-shadow:inset 0 0 0 4px var(--navy)}.brand strong{display:block;font-family:Georgia,serif;font-size:21px;color:var(--navy)}.brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:.13em;text-transform:uppercase;margin-top:2px}.nav{display:flex;align-items:center;gap:22px;font-size:14px;color:#39465a}.nav a:hover{color:var(--gold)}.nav button{border:0;background:none;color:var(--navy)}.btn{border:0;border-radius:6px;padding:12px 18px;font-weight:700}.btn.gold{background:var(--gold);color:#161616}.btn.navy{background:var(--navy);color:white}.btn.outline{background:white;border:1px solid var(--navy);color:var(--navy)}
+.hero{min-height:640px;background:linear-gradient(110deg,var(--navy) 0%,var(--navy2) 54%,#233d63 100%);color:white;padding:70px 5vw 60px;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;position:relative;overflow:hidden}.hero:before{content:"";position:absolute;width:420px;height:420px;border:1px solid rgba(199,160,74,.25);border-radius:50%;right:-120px;top:-120px}.hero:after{content:"";position:absolute;width:230px;height:230px;border:1px solid rgba(255,255,255,.08);border-radius:50%;left:42%;bottom:-100px}.kicker{color:#e9c979;letter-spacing:.18em;text-transform:uppercase;font-size:12px;font-weight:800}.hero h1{font-family:Georgia,serif;font-weight:500;font-size:60px;line-height:1.02;margin:16px 0 18px;max-width:760px}.hero h1 em{color:#efcf83;font-style:italic}.hero p{font-size:18px;line-height:1.7;color:#d9e1ed;max-width:650px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:28px 0 16px}.hero-note{font-size:13px!important;color:#aebed4!important}.live-chip{display:inline-flex;align-items:center;gap:8px;margin-top:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:8px 12px;font-size:13px}.dot{width:8px;height:8px;background:#63d7a4;border-radius:50%;box-shadow:0 0 0 5px rgba(99,215,164,.12)}
+.bookstage{perspective:1400px;position:relative;z-index:2}.book{display:grid;grid-template-columns:1fr 1fr;min-height:420px;background:var(--paper);color:#29251f;border-radius:5px 10px 10px 5px;box-shadow:0 30px 70px rgba(0,0,0,.32);transform:rotateY(-3deg);overflow:hidden;border:1px solid #d8cfbf}.page{padding:36px 34px 42px;position:relative;background:linear-gradient(90deg,#fffdf8,#f9f4e8)}.page:first-child{border-right:1px solid #ded5c6;box-shadow:inset -14px 0 22px rgba(75,61,43,.05)}.page:last-child{box-shadow:inset 14px 0 22px rgba(75,61,43,.05)}.page .chapter{font-size:10px;letter-spacing:.16em;color:#9b7a37;text-transform:uppercase}.page h3{font-family:Georgia,serif;font-size:26px;font-weight:500;margin:12px 0 20px}.page p{color:#413a31;font-family:Georgia,serif;font-size:15px;line-height:1.75}.page .date{position:absolute;bottom:26px;left:34px;color:#8e806c;font-size:11px}.page .number{position:absolute;bottom:20px;right:28px;font-family:Georgia,serif}.badge{display:inline-block;background:var(--navy);color:#fff;padding:6px 9px;border-radius:4px;font-size:10px;letter-spacing:.12em;font-weight:800}.page-next{margin-top:22px;border:0;background:var(--gold);color:#1b1b1b;padding:10px 14px;border-radius:4px;font-weight:800}
+.stats{background:white;border-bottom:1px solid #e3e5e8;display:grid;grid-template-columns:repeat(4,1fr);padding:0 5vw}.stat{padding:28px 22px;border-right:1px solid #ece9e3}.stat:last-child{border-right:0}.stat strong{font-family:Georgia,serif;color:var(--navy);font-size:32px;display:block}.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.section{padding:76px 5vw}.section.alt{background:#f0f2f4}.section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:32px}.section h2{font-family:Georgia,serif;font-weight:500;color:var(--navy);font-size:40px;margin:8px 0}.section-intro{max-width:760px;color:#687180;line-height:1.65}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.book-card{background:white;border:1px solid #e5e5e1;border-radius:9px;overflow:hidden;box-shadow:0 8px 24px rgba(17,28,48,.06);transition:.2s}.book-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.cover{height:250px;padding:26px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(145deg,#10203b,#263e62);color:white}.cover.gold2{background:linear-gradient(145deg,#5a3c20,#b0813f)}.cover.green2{background:linear-gradient(145deg,#173d38,#3d7668)}.cover small{letter-spacing:.15em;text-transform:uppercase;color:#e8d3a5}.cover h3{font-family:Georgia,serif;font-size:27px;font-weight:500;max-width:85%;margin:0}.cover .pseud{font-size:13px;color:#ecedf1}.card-body{padding:20px}.meta{display:flex;justify-content:space-between;gap:10px;color:#727986;font-size:12px;margin-bottom:14px}.progress{height:5px;background:#ebe9e4;border-radius:10px;overflow:hidden}.progress i{height:100%;display:block;background:var(--gold)}.card-actions{display:flex;gap:8px;margin-top:16px}.card-actions button{flex:1}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:28px}.institutional-card{background:var(--navy);color:white;border-radius:10px;padding:42px}.institutional-card h2{color:white}.institutional-card p{color:#ced8e7;line-height:1.7}.feature-list{display:grid;gap:14px;margin:26px 0}.feature{display:grid;grid-template-columns:36px 1fr;gap:13px}.feature b{display:block;color:#fff}.feature span{color:#bdc9da;font-size:14px}.num{width:32px;height:32px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:#edcf8c;font-size:12px}.form-demo{background:white;border:1px solid #e2e2de;border-radius:10px;padding:34px;box-shadow:var(--shadow)}.form-demo h3{font-family:Georgia,serif;color:var(--navy);font-size:26px;margin-top:0}.field{margin-bottom:13px}.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#717782;margin-bottom:6px}.fake{border:1px solid #deded9;background:#fafaf8;border-radius:5px;padding:12px;color:#50545c}.editor{min-height:110px;line-height:1.55}
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.price-card{background:white;border:1px solid #e4e4e0;border-radius:9px;padding:30px;position:relative}.price-card.featured{background:var(--navy);color:white;border-color:var(--navy)}.price-card .label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8a7447}.price-card.featured .label{color:#e8ca82}.price-card strong{display:block;font-family:Georgia,serif;font-size:47px;margin:15px 0 0;color:var(--navy)}.price-card.featured strong{color:white}.price-card small{color:#7f858f}.price-card.featured small{color:#bec8d7}.price-card p{line-height:1.6;color:#69717f}.price-card.featured p{color:#cbd4e2}.price-card button{width:100%;margin-top:12px}
+.footer{background:#081325;color:#c9d2df;padding:38px 5vw;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center}.footer strong{color:white;font-family:Georgia,serif;font-size:20px}.footer small{color:#8fa0b8}.modal{display:none;position:fixed;inset:0;z-index:60}.modal.open{display:block}.backdrop{position:absolute;inset:0;background:rgba(3,9,19,.72)}.modal-card{position:relative;background:white;width:min(760px,92vw);max-height:90vh;overflow:auto;margin:5vh auto;border-radius:10px;padding:30px;box-shadow:0 30px 80px rgba(0,0,0,.35)}.close{position:absolute;right:14px;top:10px;border:0;background:none;font-size:28px;color:#68707c}.modal-card h2{font-family:Georgia,serif;color:var(--navy)}.grid-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid-form input,.grid-form select,.grid-form textarea{width:100%;padding:11px;border:1px solid #d9d9d4;border-radius:5px}.grid-form .wide{grid-column:1/-1}.legal{font-size:12px;color:#727986;line-height:1.5}.reader{max-width:900px}.reader-page{background:var(--paper);padding:42px;min-height:360px;border:1px solid #ddd4c5;font-family:Georgia,serif;line-height:1.8}.reader-page .warning{font-family:Inter,Arial,sans-serif;margin-top:28px;border-top:1px solid #ddd4c5;padding-top:16px;color:#7e6540;font-size:12px}.reader-controls{display:flex;justify-content:space-between;align-items:center;margin-top:15px}.bar{height:5px;background:#e7e7e2;margin:14px 0}.bar span{display:block;height:100%;background:var(--gold)}
+@media(max-width:920px){.nav a{display:none}.hero{grid-template-columns:1fr;padding-top:54px}.hero h1{font-size:46px}.bookstage{max-width:690px}.stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:0}.cards,.pricing{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
+@media(max-width:620px){.topline{display:none}.header{padding:10px 16px}.brand strong{font-size:18px}.hero{padding:48px 20px}.hero h1{font-size:39px}.book{grid-template-columns:1fr}.page:first-child{display:none}.stats{grid-template-columns:1fr 1fr;padding:0}.stat{padding:19px 15px}.stat strong{font-size:25px}.section{padding:56px 20px}.section h2{font-size:32px}.cards,.pricing{grid-template-columns:1fr}.section-head{align-items:start}.two{grid-template-columns:1fr}.grid-form{grid-template-columns:1fr}.grid-form .wide{grid-column:auto}.footer{grid-template-columns:1fr}.actions{flex-direction:column}.actions button{width:100%}}
+</style>
+</head>
+<body>
+<div class="topline"><span>Portal Editorial · Edith Alanis</span><span><b>Libros que se escriben todos los días</b></span></div>
+<header class="header">
+  <a class="brand" href="#inicio"><span class="seal">EA</span><span><strong>Portal Editorial Edith Alanis</strong><small>Plataforma editorial continua</small></span></a>
+  <nav class="nav"><a href="#libros">Libros</a><a href="#autores">Autores</a><a href="#modelo">Suscripciones</a><button onclick="PortalAuth.showLogin('admin')">Entrar</button><button class="btn gold" data-open="registro">Inscribirme</button><a href="#administracion">Administración</a><a href="#modelo-lectura">Lectores y autores</a></nav>
+</header>
+<main>
+<section class="hero" id="inicio">
+ <div>
+  <div class="kicker">Una nueva forma de vivir un libro</div>
+  <h1>Lee una obra <em>mientras está naciendo.</em></h1>
+  <p>Autores de distintas partes pueden escribir y publicar sus libros día a día. Los lectores acompañan el proceso en tiempo real y descubren cada nuevo avance una sola vez.</p>
+  <div class="actions"><button class="btn gold" data-open="lector">Ser lector · $100 / 30 días</button><button class="btn outline" data-open="autor">Publicar como autor · $500/mes</button></div>
+  <p class="hero-note">Los autores publican con seudónimo. La identidad legal permanece privada en el área administrativa. Los libros terminados pueden adquirirse completos en PDF por $500 MXN.</p>
+  <div class="live-chip"><span class="dot"></span> Hay autores escribiendo hoy</div>
+ </div>
+ <div class="bookstage">
+  <div class="book">
+   <div class="page"><span class="chapter">Capítulo IV</span><h3>La ciudad que despertaba</h3><p>La mañana llegó sin avisar. En la plaza todavía quedaban las huellas de la lluvia y una luz nueva parecía entrar por cada ventana.</p><p>Quienes habían seguido la historia desde el principio sabían que algo estaba por cambiar.</p><span class="date">Escrito el 20 de agosto de 2026</span><span class="number">47</span></div>
+   <div class="page"><span class="badge">NUEVO HOY</span><h3>El siguiente instante</h3><p>El autor añadió cinco páginas esta tarde. El lector puede permanecer aquí todo el tiempo que necesite.</p><p>Cuando pulse “Siguiente”, esta página quedará registrada como leída y la historia continuará hacia adelante.</p><button class="page-next" data-demo-reader>Continuar →</button><span class="date">Publicado hoy · 18:34</span><span class="number">48</span></div>
+  </div>
+ </div>
+</section>
+<section class="stats"><div class="stat"><strong>100</strong><span>MXN · lector / 30 días</span></div><div class="stat"><strong>500</strong><span>MXN · autor mensual</span></div><div class="stat"><strong>500</strong><span>MXN · libro terminado</span></div><div class="stat"><strong>24/7</strong><span>Obras en evolución</span></div></section>
+<section class="section" id="libros">
+ <div class="section-head"><div><span class="kicker">Biblioteca en movimiento</span><h2>Libros que se están escribiendo</h2><p class="section-intro">Cada obra conserva la fecha de sus avances. El lector sabe qué se publicó hoy y continúa exactamente desde el punto donde quedó.</p></div><button class="btn outline">Ver biblioteca completa</button></div>
+ <div class="cards" id="bookGrid"></div>
+</section>
+<section class="section alt" id="autores">
+ <div class="two">
+  <div class="institutional-card"><span class="kicker">Programa de autores</span><h2>Una identidad privada. Un seudónimo público.</h2><p>La plataforma solicita los datos administrativos necesarios del autor, pero ante los lectores aparece únicamente el seudónimo elegido para cada obra.</p><div class="feature-list"><div class="feature"><span class="num">01</span><div><b>Cuenta verificada</b><span>Nombre real, contacto y datos administrativos protegidos.</span></div></div><div class="feature"><span class="num">02</span><div><b>Perfil por seudónimo</b><span>El nombre literario es el que se muestra públicamente.</span></div></div><div class="feature"><span class="num">03</span><div><b>Varios libros</b><span>Un autor puede mantener varias obras en proceso.</span></div></div><div class="feature"><span class="num">04</span><div><b>Historial diario</b><span>Cada publicación conserva fecha, versión y avance.</span></div></div></div><button class="btn gold" data-open="autor">Abrir cuenta de autor</button></div>
+  <div class="form-demo"><h3>Panel editorial</h3><div class="field"><label>Seudónimo público</label><div class="fake">Luna del Valle</div></div><div class="field"><label>Libro activo</label><div class="fake">El mapa de los días invisibles</div></div><div class="field"><label>Escritura de hoy · 20/08/2026</label><div class="fake editor">La puerta estaba entreabierta cuando llegó. Había escrito sobre ella durante semanas, pero nunca había imaginado que aparecería exactamente así...</div></div><div class="actions"><button class="btn outline">Guardar borrador</button><button class="btn navy">Publicar avance</button></div></div>
+ </div>
+</section>
+<section class="section" id="modelo"><span class="kicker">Modelo editorial</span><h2>Tres formas de participar</h2><p class="section-intro">Una estructura sencilla para leer, escribir y conservar la obra completa una vez terminada.</p><div class="pricing"><article class="price-card"><span class="label">Lector</span><strong>$100</strong><small>MXN / 30 días</small><p>Acceso a nuevos escritos. Cada página puede leerse antes de avanzar; una vez que se continúa, la anterior queda cerrada.</p><button class="btn navy" data-open="lector">Suscribirme</button></article><article class="price-card featured"><span class="label">Autor</span><strong>$500</strong><small>MXN / mes</small><p>Cuenta de autor, seudónimo público, varios libros, escritura diaria, historial de versiones y funciones de lectura.</p><button class="btn gold" data-open="autor" onclick="openPaymentRequest('Inscripción de autor · $500 MXN/mes')">Solicitar inscripción</button></article><article class="price-card"><span class="label">Libro terminado</span><strong>$500</strong><small>MXN / obra</small><p>PDF completo para uso personal, con folio de compra y aviso de prohibición de reproducción y distribución no autorizada.</p><button class="btn outline" data-buy>Comprar ejemplo</button></article></div></section>
+</main>
+
+
+<section class="section" id="modelo-lectura">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Modelo de lectura y participación</span>
+      <h2>Suscripción por 30 días y selección de 3 obras</h2>
+    </div>
+  </div>
+
+  <div class="grid three">
+    <article class="card">
+      <h3>Lector · $100 MXN</h3>
+      <p>La suscripción tiene una vigencia exacta de <b>30 días a partir de la fecha de activación</b>, independientemente del día del mes en que se realice el pago.</p>
+    </article>
+    <article class="card">
+      <h3>3 obras por periodo</h3>
+      <p>El lector podrá elegir <b>hasta 3 obras</b>. Una vez seleccionadas, las obras quedarán <b>fijas durante los 30 días</b> y no podrán sustituirse hasta la siguiente renovación.</p>
+    </article>
+    <article class="card">
+      <h3>Pago a autores</h3>
+      <p>El <b>20% de la suscripción del lector</b> se destina a los autores de las obras seleccionadas. La liquidación de las participaciones acumuladas se realizará <b>bimestralmente</b>.</p>
+    </article>
+  </div>
+
+  <article class="card" style="margin-top:22px">
+    <span class="eyebrow">Ejemplo de pago para los autores</span>
+    <h3>Un lector paga $100 por 30 días</h3>
+    <p>El 20% destinado a autores equivale a <b>$20 MXN</b>. Ese importe se distribuye entre las obras que el lector haya seleccionado durante su periodo:</p>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;margin-top:12px">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:10px;border-bottom:1px solid #ddd">Obras seleccionadas</th>
+            <th style="text-align:left;padding:10px;border-bottom:1px solid #ddd">Distribución de los $20</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:10px;border-bottom:1px solid #eee">1 obra</td><td style="padding:10px;border-bottom:1px solid #eee"><b>$20.00</b> para el autor de esa obra</td></tr>
+          <tr><td style="padding:10px;border-bottom:1px solid #eee">2 obras</td><td style="padding:10px;border-bottom:1px solid #eee"><b>$10.00</b> por cada obra</td></tr>
+          <tr><td style="padding:10px">3 obras</td><td style="padding:10px"><b>$6.67, $6.67 y $6.66</b>, para completar exactamente $20.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notice" style="margin-top:16px">
+      <b>Ejemplo bimestral:</b> si una obra acumula 300 participaciones de $6.67 durante el periodo, su participación aproximada sería de <b>$2,001 MXN</b>. El sistema llevará el cálculo individual por lector y obra y mostrará el total acumulado antes de cada liquidación.
+    </div>
+  </article>
+</section>
+
+<section class="section" id="administracion">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Administración y participación de autores</span>
+      <h2>Accesos seguros y reparto transparente</h2>
+    </div>
+  </div>
+  <div class="grid three">
+    <article class="card">
+      <h3>Participación del autor</h3>
+      <p>Los autores comparten el <b>20% de la suscripción de $100 del lector</b>, distribuido entre las obras seleccionadas. Las participaciones acumuladas se liquidan <b>bimestralmente</b>.</p>
+      <div class="notice"><b>Panel del autor:</b> mostrará lectores vinculados, mensualidades consideradas, participación generada y estado de pago.</div>
+    </article>
+    <article class="card">
+      <h3>5 administradores gratuitos</h3>
+      <p>El portal contempla <b>cinco accesos administrativos sin costo</b>: una Administradora Principal y cuatro Administradores adicionales.</p>
+      <div class="notice">Cada administrador tendrá un <b>NIP individual + contraseña</b>. Las credenciales reales no se guardarán en el HTML público.</div>
+    </article>
+    <article class="card">
+      <h3>Usuarios de pago</h3>
+      <p>Lectores y autores tendrán accesos independientes con <b>correo electrónico + NIP + contraseña</b>, activados después de confirmar el pago.</p>
+      <button class="btn primary" onclick="openAdminDemo()">Ver acceso administrativo</button>
+    </article>
+  </div>
+</section>
+
+
+<section class="section alt" id="acceso-real">
+  <div class="section-head"><div><span class="kicker" style="color:#9b7a37">Acceso seguro</span><h2>Lectores, autores y administradores</h2><p class="section-intro">Cada persona utiliza su propia cuenta. El NIP y la contraseña nunca se publican dentro del código del portal.</p></div></div>
+  <div class="cards">
+    <article class="book-card"><div class="card-body"><h3>Lectores</h3><p>$100 MXN por 30 días. Después de la activación pueden elegir hasta 3 obras, que permanecen fijas hasta la siguiente renovación.</p><button class="btn navy" onclick="PortalAuth.showLogin('reader')">Entrar como lector</button></div></article>
+    <article class="book-card"><div class="card-body"><h3>Autores</h3><p>$500 MXN mensuales. Pueden escribir varios libros, sin límite editorial de páginas ni capítulos, y publicar mediante seudónimo.</p><button class="btn navy" onclick="PortalAuth.showLogin('author')">Entrar como autor</button></div></article>
+    <article class="book-card"><div class="card-body"><h3>Administración</h3><p>El sistema contempla 5 cuentas gratuitas: 1 Administradora Principal y 4 Administradores adicionales, cada una con NIP y contraseña propios.</p><button class="btn gold" onclick="PortalAuth.showLogin('admin')">Acceso administrativo</button></div></article>
+  </div>
+</section>
+<div class="modal" id="secureLoginModal"><div class="backdrop" onclick="PortalAuth.closeLogin()"></div><div class="modal-card" style="max-width:520px"><button class="close" onclick="PortalAuth.closeLogin()">×</button><h2 id="secureLoginTitle">Acceso</h2><div id="secureLoginMessage" class="legal" style="margin-bottom:14px"></div><div class="grid-form"><div class="wide"><input id="loginEmail" type="email" placeholder="Correo electrónico"></div><div><input id="loginPin" inputmode="numeric" maxlength="8" placeholder="NIP"></div><div><input id="loginPassword" type="password" placeholder="Contraseña"></div><div class="wide"><button class="btn navy" style="width:100%" onclick="PortalAuth.login()">Entrar</button></div></div><p class="legal" style="margin-top:12px">Las credenciales se validan contra la base de datos segura. El archivo público de GitHub no contiene contraseñas reales.</p></div></div>
+<section class="section" id="panel-usuario" style="display:none"><div class="section-head"><div><span class="kicker" style="color:#9b7a37">Sesión activa</span><h2 id="panelTitle">Mi panel</h2><p id="panelSubtitle" class="section-intro"></p></div><button class="btn outline" onclick="PortalAuth.logout()">Cerrar sesión</button></div><div id="panelContent"></div></section>
+
+<footer class="footer"><div><strong>Portal Editorial Edith Alanis</strong><br><small>Portal Editorial Edith Alanis · libros.edithalanis.com</small></div><div>© 2026 Portal Editorial Edith Alanis · Todos los derechos reservados</div></footer>
+<div class="modal" id="modal"><div class="backdrop" data-close></div><div class="modal-card"><button class="close" data-close>×</button><div id="modalContent"></div></div></div>
+<script>
+const books=[
+ {title:'Vida y Obra de José Isidro Alanis M',author:'Seudónimo del autor',date:'Escribiéndose actualmente',pages:1,pct:10,cls:''},
+ {title:'Cuento para Manuel la no discapacidad',author:'Seudónimo del autor',date:'Escribiéndose actualmente',pages:1,pct:10,cls:'gold2'},
+ {title:'Propiedad intelectual paso a paso',author:'Seudónimo del autor',date:'Escribiéndose actualmente',pages:1,pct:10,cls:'green2'}
+];
+const grid=document.getElementById('bookGrid');
+books.forEach((b,i)=>{grid.insertAdjacentHTML('beforeend',`<article class="book-card"><div class="cover ${b.cls}"><small>ESCRIBIÉNDOSE AHORA</small><h3>${b.title}</h3><span class="pseud">por ${b.author}</span></div><div class="card-body"><div class="meta"><span>${b.date}</span><span>${b.pages} páginas</span></div><div class="progress"><i style="width:${b.pct}%"></i></div><div class="card-actions"><button class="btn navy" data-read="${i}">Leer lo nuevo</button><button class="btn outline">Ver libro</button></div></div></article>`)});
+const modal=document.getElementById('modal'), content=document.getElementById('modalContent');
+function openModal(html,cls=''){content.innerHTML=html;modal.querySelector('.modal-card').className='modal-card '+cls;modal.classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(){modal.classList.remove('open');document.body.style.overflow=''}
+document.addEventListener('click',e=>{if(e.target.matches('[data-close]'))closeModal();
+ if(e.target.matches('[data-open]')){const type=e.target.dataset.open;if(type==='autor')authorForm();else if(type==='lector')readerForm();else if(type==='login')loginForm();else choiceForm();}
+ if(e.target.matches('[data-read]'))readerDemo(Number(e.target.dataset.read));if(e.target.matches('[data-demo-reader]'))readerDemo(0);if(e.target.matches('[data-buy]'))buyDemo();});
+function choiceForm(){openModal(`<h2>¿Cómo quieres participar?</h2><p>Selecciona el tipo de cuenta.</p><div class="actions"><button class="btn navy" onclick="readerForm()">Lector · $100 / 30 días</button><button class="btn gold" onclick="authorForm()">Autor · $500/mes</button></div>`)}
+function readerForm(){openModal(`<h2>Inscripción de lector</h2><p>Lee las nuevas páginas de los libros activos y continúa siempre hacia adelante.</p><div class="grid-form"><input placeholder="Nombre completo"><input placeholder="Correo electrónico" type="email"><input placeholder="Teléfono"><input placeholder="Contraseña" type="password"><div class="wide legal"><input type="checkbox"> Acepto los términos de lectura y la suscripción de $100 MXN por 30 días.</div><button class="btn navy wide">Continuar al pago</button></div>`)}
+function authorForm(){openModal(`<h2>Inscripción de autor</h2><p>Tus datos reales son administrativos; públicamente aparecerá tu seudónimo.</p><div class="grid-form"><input placeholder="Nombre(s)"><input placeholder="Apellidos"><input placeholder="Fecha de nacimiento" type="date"><input placeholder="Correo electrónico" type="email"><input placeholder="Teléfono"><input placeholder="País"><input placeholder="Estado / provincia"><input placeholder="Ciudad"><input class="wide" placeholder="Domicilio"><input placeholder="Código postal"><input placeholder="Seudónimo público"><input placeholder="Contraseña" type="password"><div class="wide legal"><input type="checkbox"> Confirmo que la información proporcionada es correcta y acepto las condiciones para autores y la suscripción de $500 MXN mensuales.</div><button class="btn navy wide">Continuar al pago</button></div>`)}
+function loginForm(){openModal(`<h2>Entrar</h2><div class="grid-form"><input class="wide" placeholder="Correo electrónico"><input class="wide" placeholder="Contraseña" type="password"><button class="btn navy wide">Ingresar</button></div>`)}
+let readerPage=0;
+function readerDemo(i=0){readerPage=0;const b=books[i]||books[0];const pages=[`La tarde se extendía sobre los tejados. Nadie en la plaza sabía todavía que aquel día quedaría escrito como el principio de todo.`,`La puerta se abrió lentamente. Había una carta sobre la mesa y, junto a ella, una fecha escrita a mano.`,`Durante varios minutos permaneció en silencio. Después tomó el cuaderno y escribió la primera frase de una historia que aún no conocía.`];openModal(`<div class="reader"><span class="kicker">Lectura activa</span><h2>${b.title}</h2><p>por ${b.author}</p><div class="bar"><span id="rbar" style="width:33%"></span></div><div class="reader-page"><span class="badge">NUEVO PARA TI</span><div id="rtext" style="margin-top:22px">${pages[0]}</div><div class="warning">Al pulsar “Siguiente”, esta página quedará registrada como leída y no podrás regresar a ella con tu suscripción.</div></div><div class="reader-controls"><span id="rcount">Avance nuevo 1 de 3</span><button class="btn gold" id="nextReader">Siguiente →</button></div></div>`,'reader');document.getElementById('nextReader').onclick=()=>{readerPage++;if(readerPage>=pages.length){document.getElementById('rtext').innerHTML='<b>Ya leíste todo lo nuevo disponible.</b><br><br>Cuando el autor publique otra página, continuarás desde aquí.';document.getElementById('nextReader').style.display='none';document.getElementById('rcount').textContent='Lectura al día';document.getElementById('rbar').style.width='100%';return}document.getElementById('rtext').textContent=pages[readerPage];document.getElementById('rcount').textContent=`Avance nuevo ${readerPage+1} de 3`;document.getElementById('rbar').style.width=`${(readerPage+1)/3*100}%`}}
+function buyDemo(){openModal(`<h2>Comprar libro terminado · $500 MXN</h2><p>Al finalizar el pago, recibirás la edición completa en PDF para uso personal.</p><div class="form-demo"><b>Vida y Obra de José Isidro Alanis M</b><p>Autor: Seudónimo del autor</p><p>Precio: <b>$500 MXN</b></p><p class="legal"><b>PROHIBIDA SU REPRODUCCIÓN Y DISTRIBUCIÓN NO AUTORIZADA.</b><br>La copia digital será identificada con un folio de adquisición y se proporciona para uso personal del comprador, conforme a los términos aplicables.</p><button class="btn navy" style="width:100%">Continuar al pago</button></div>`)}
+</script>
+
+<div class="modal" id="paymentRequestModal" aria-hidden="true">
+  <div class="modal-card" style="max-width:560px">
+    <button class="modal-close" onclick="closePaymentRequest()" aria-label="Cerrar">×</button>
+    <span class="eyebrow">Solicitud de pago</span>
+    <h2 style="margin-top:8px">Recibe los datos para realizar tu pago</h2>
+    <p class="muted">Déjanos tu correo electrónico y teléfono. Te enviaremos directamente los datos de la cuenta y las instrucciones para realizar el pago.</p>
+    <form id="paymentRequestForm" onsubmit="sendPaymentRequest(event)">
+      <input type="hidden" id="paymentConcept" value="Suscripción">
+      <label>Nombre completo
+        <input id="payName" required placeholder="Tu nombre completo">
+      </label>
+      <label>Correo electrónico
+        <input id="payEmail" type="email" required placeholder="correo@ejemplo.com">
+      </label>
+      <label>Teléfono
+        <input id="payPhone" type="tel" required placeholder="Teléfono con lada">
+      </label>
+      <label>Concepto
+        <input id="payConceptVisible" readonly value="Suscripción">
+      </label>
+      <div class="notice" style="margin-top:14px">
+        <b>Importante:</b> no se solicitarán datos bancarios en este formulario. El Portal Editorial Edith Alanis te enviará los datos de la cuenta para realizar el pago.
+      </div>
+      <button class="btn primary" type="submit" style="width:100%;margin-top:16px">Enviar solicitud de pago</button>
+    </form>
+    <div id="paymentSent" class="notice" style="display:none;margin-top:14px">
+      <b>Solicitud registrada.</b> Nos pondremos en contacto contigo por correo electrónico o teléfono para enviarte los datos de pago.
+    </div>
+  </div>
+</div>
+<script>
+function openPaymentRequest(concept){
+  const m=document.getElementById('paymentRequestModal');
+  document.getElementById('paymentConcept').value=concept;
+  document.getElementById('payConceptVisible').value=concept;
+  document.getElementById('paymentRequestForm').style.display='block';
+  document.getElementById('paymentSent').style.display='none';
+  m.classList.add('show'); m.setAttribute('aria-hidden','false');
+}
+function closePaymentRequest(){
+  const m=document.getElementById('paymentRequestModal');
+  m.classList.remove('show'); m.setAttribute('aria-hidden','true');
+}
+function sendPaymentRequest(e){
+  e.preventDefault();
+  const data={
+    nombre:document.getElementById('payName').value.trim(),
+    email:document.getElementById('payEmail').value.trim(),
+    telefono:document.getElementById('payPhone').value.trim(),
+    concepto:document.getElementById('paymentConcept').value,
+    fecha:new Date().toISOString()
+  };
+  const solicitudes=JSON.parse(localStorage.getItem('portalSolicitudesPago')||'[]');
+  solicitudes.push(data);
+  localStorage.setItem('portalSolicitudesPago',JSON.stringify(solicitudes));
+  document.getElementById('paymentRequestForm').style.display='none';
+  document.getElementById('paymentSent').style.display='block';
+}
+</script>
+
+
+<div class="modal" id="adminDemoModal" aria-hidden="true">
+  <div class="modal-card" style="max-width:520px">
+    <button class="modal-close" onclick="closeAdminDemo()" aria-label="Cerrar">×</button>
+    <span class="eyebrow">Acceso administrativo</span>
+    <h2 style="margin-top:8px">Portal Editorial Edith Alanis</h2>
+    <p class="muted">Prototipo del acceso reservado para los cinco administradores gratuitos.</p>
+    <label>NIP
+      <input type="password" inputmode="numeric" placeholder="NIP individual" disabled>
+    </label>
+    <label>Contraseña
+      <input type="password" placeholder="Contraseña personal" disabled>
+    </label>
+    <div class="notice" style="margin-top:14px">
+      <b>Seguridad:</b> este prototipo no contiene NIP ni contraseñas reales. Las credenciales se habilitarán cuando conectemos autenticación y base de datos segura.
+    </div>
+    <h3 style="margin-top:18px">Cuentas previstas</h3>
+    <p>Administradora Principal · Administrador 2 · Administrador 3 · Administrador 4 · Administrador 5</p>
+  </div>
+</div>
+<script>
+function openAdminDemo(){
+  const m=document.getElementById('adminDemoModal');
+  m.classList.add('show'); m.setAttribute('aria-hidden','false');
+}
+function closeAdminDemo(){
+  const m=document.getElementById('adminDemoModal');
+  m.classList.remove('show'); m.setAttribute('aria-hidden','true');
+}
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
