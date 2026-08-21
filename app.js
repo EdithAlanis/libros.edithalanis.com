@@ -1,9 +1,273 @@
-(function(){
-const cfg=window.PORTAL_CONFIG||{};let sb=null,desiredRole='reader';const $=id=>document.getElementById(id);const configured=()=>!!(cfg.SUPABASE_URL&&cfg.SUPABASE_ANON_KEY&&window.supabase);const client=()=>{if(!configured())return null;if(!sb)sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);return sb};
-async function showLogin(role){desiredRole=role;const t={reader:'Acceso de lector',author:'Acceso de autor',admin:'Acceso administrativo'};$('secureLoginTitle').textContent=t[role]||'Acceso';$('secureLoginMessage').textContent=configured()?'Ingresa con el correo, NIP y contraseña asociados a tu cuenta.':'La interfaz está preparada. Falta conectar la base de datos segura para habilitar accesos reales.';$('secureLoginModal').classList.add('open')}
-function closeLogin(){$('secureLoginModal').classList.remove('open')}
-async function login(){if(!configured()){alert('Falta conectar Supabase. Consulta README.md.');return}const email=$('loginEmail').value.trim(),pin=$('loginPin').value.trim(),password=$('loginPassword').value;if(!email||!pin||!password){alert('Captura correo, NIP y contraseña.');return}const c=client();const {data,error}=await c.auth.signInWithPassword({email,password});if(error){alert('No fue posible iniciar sesión: '+error.message);return}const {data:ok,error:pe}=await c.rpc('verify_portal_pin',{p_pin:pin});if(pe||!ok){await c.auth.signOut();alert('NIP incorrecto.');return}const {data:profile,error:pr}=await c.from('profiles').select('*').eq('id',data.user.id).single();if(pr||!profile){await c.auth.signOut();alert('No se encontró el perfil.');return}if(profile.role!==desiredRole&&!(desiredRole==='reader'&&profile.role==='author')){await c.auth.signOut();alert('Esta cuenta no corresponde al acceso seleccionado.');return}if(!profile.is_active){await c.auth.signOut();alert('Tu cuenta todavía no ha sido activada por Administración.');return}closeLogin();renderPanel(profile)}
-async function logout(){if(configured())await client().auth.signOut();$('panel-usuario').style.display='none'}
-function renderPanel(p){$('panel-usuario').style.display='block';$('panelTitle').textContent=p.role==='admin'?'Panel administrativo':p.role==='author'?'Panel del autor':'Panel del lector';$('panelSubtitle').textContent='Sesión de '+(p.display_name||p.email||'usuario');const c=$('panelContent');if(p.role==='admin'){c.innerHTML='<div class="cards"><article class="book-card"><div class="card-body"><h3>Usuarios</h3><p>Activar lectores y autores después de comprobar su pago.</p></div></article><article class="book-card"><div class="card-body"><h3>Pagos a autores</h3><p>Liquidaciones bimestrales calculadas a partir de lectores activos y obras seleccionadas.</p></div></article><article class="book-card"><div class="card-body"><h3>Administradores</h3><p>Máximo 5 cuentas gratuitas: 1 principal y 4 adicionales.</p></div></article></div>'}else if(p.role==='author'){c.innerHTML='<div class="cards"><article class="book-card"><div class="card-body"><h3>Mis libros</h3><p>Crear, escribir y publicar sin límite editorial de páginas.</p></div></article><article class="book-card"><div class="card-body"><h3>Participación</h3><p>Consulta lectores vinculados y el 20% distribuido proporcionalmente. Pago bimestral.</p></div></article><article class="book-card"><div class="card-body"><h3>Seudónimo</h3><p>La identidad legal permanece privada; el libro se publica con seudónimo.</p></div></article></div>'}else{c.innerHTML='<div class="cards"><article class="book-card"><div class="card-body"><h3>Mis 3 obras</h3><p>Las elecciones quedan fijas durante tu periodo activo de 30 días.</p></div></article><article class="book-card"><div class="card-body"><h3>Lectura</h3><p>Solo puedes avanzar. Al pasar de página, la anterior queda registrada como leída.</p></div></article><article class="book-card"><div class="card-body"><h3>Vigencia</h3><p>Tu acceso vence 30 días después de la activación.</p></div></article></div>'}location.hash='panel-usuario'}
-window.PortalAuth={showLogin,closeLogin,login,logout};document.addEventListener('DOMContentLoaded',async()=>{if(!configured())return;const {data:{session}}=await client().auth.getSession();if(session){const {data:p}=await client().from('profiles').select('*').eq('id',session.user.id).single();if(p&&p.is_active)renderPanel(p)}})
+function () {
+  const cfg = window.PORTAL_CONFIG || {};
+  let sb = null;
+  let desiredRole = 'administrador';
+
+  const $ = (id) => document.getElementById(id);
+
+  const configured = () =>
+    !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
+
+  const client = () => {
+    if (!configured()) return null;
+
+    if (!sb) {
+      sb = window.supabase.createClient(
+        cfg.SUPABASE_URL,
+        cfg.SUPABASE_ANON_KEY
+      );
+    }
+
+    return sb;
+  };
+
+  async function showLogin(role = 'administrador') {
+
+    const normalized = {
+      reader: 'lector',
+      author: 'autor',
+      admin: 'administrador'
+    };
+
+    desiredRole = normalized[role] || role;
+
+    const titles = {
+      lector: 'Acceso de lector',
+      autor: 'Acceso de autor',
+      administrador: 'Acceso administrativo'
+    };
+
+    document.getElementById('secureLoginTitle').textContent =
+      titles[desiredRole] || 'Acceso seguro';
+
+    document.getElementById('secureLoginMessage').textContent =
+      configured()
+        ? 'Ingresa con tu correo electrónico, NIP y contraseña.'
+        : 'Falta conectar Supabase en config.js.';
+
+    document
+      .getElementById('secureLoginModal')
+      .classList.add('open');
+
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLogin() {
+    document
+      .getElementById('secureLoginModal')
+      .classList.remove('open');
+
+    document.body.style.overflow = '';
+  }
+
+  async function login() {
+
+    if (!configured()) {
+      alert('Falta conectar Supabase en config.js.');
+      return;
+    }
+
+    const email =
+      document.getElementById('loginEmail').value.trim();
+
+    const pin =
+      document.getElementById('loginPin').value.trim();
+
+    const password =
+      document.getElementById('loginPassword').value;
+
+    if (!email || !pin || !password) {
+      alert('Captura correo, NIP y contraseña.');
+      return;
+    }
+
+    const c = client();
+
+    const { data, error } =
+      await c.auth.signInWithPassword({
+        email,
+        password
+      });
+
+    if (error) {
+      alert(
+        'No fue posible iniciar sesión: ' +
+        error.message
+      );
+      return;
+    }
+
+    const { data: nipOk, error: nipError } =
+      await c.rpc(
+        'verificar_nip',
+        { p_nip: pin }
+      );
+
+    if (nipError || !nipOk) {
+
+      await c.auth.signOut();
+
+      alert('NIP incorrecto.');
+
+      return;
+    }
+
+    const { data: perfil, error: perfilError } =
+      await c
+        .from('perfiles')
+        .select(
+          'id,email,nombre,tipo_usuario,activo'
+        )
+        .eq('id', data.user.id)
+        .single();
+
+    if (perfilError || !perfil) {
+
+      await c.auth.signOut();
+
+      alert(
+        'No se pudo consultar tu perfil.'
+      );
+
+      return;
+    }
+
+    if (perfil.tipo_usuario !== desiredRole) {
+
+      await c.auth.signOut();
+
+      alert(
+        'Esta cuenta no corresponde al tipo de acceso seleccionado.'
+      );
+
+      return;
+    }
+
+    if (!perfil.activo) {
+
+      await c.auth.signOut();
+
+      alert('Tu cuenta no está activa.');
+
+      return;
+    }
+
+    closeLogin();
+
+    renderPanel(perfil);
+  }
+
+  async function logout() {
+
+    if (configured()) {
+      await client().auth.signOut();
+    }
+
+    document.getElementById(
+      'panel-usuario'
+    ).style.display = 'none';
+  }
+
+  function renderPanel(perfil) {
+
+    document.getElementById(
+      'panel-usuario'
+    ).style.display = 'block';
+
+    document.getElementById(
+      'panelTitle'
+    ).textContent =
+      perfil.tipo_usuario === 'administrador'
+        ? 'Panel administrativo'
+        : perfil.tipo_usuario === 'autor'
+        ? 'Panel del autor'
+        : 'Panel del lector';
+
+    document.getElementById(
+      'panelSubtitle'
+    ).textContent =
+      'Sesión de ' +
+      (perfil.nombre ||
+        perfil.email ||
+        'usuario');
+
+    location.hash = 'panel-usuario';
+  }
+
+  window.PortalAuth = {
+    showLogin,
+    closeLogin,
+    login,
+    logout
+  };
+
+  document.addEventListener(
+    'DOMContentLoaded',
+    async () => {
+
+      const oldLoginButton =
+        document.querySelector(
+          '[data-open="login"]'
+        );
+
+      if (oldLoginButton) {
+
+        oldLoginButton.removeAttribute(
+          'data-open'
+        );
+
+        oldLoginButton.addEventListener(
+          'click',
+          () =>
+            showLogin(
+              'administrador'
+            )
+        );
+      }
+
+      document
+        .querySelectorAll('button')
+        .forEach((btn) => {
+
+          if (
+            btn.textContent.trim() ===
+            'Ver acceso administrativo'
+          ) {
+
+            btn.onclick = () =>
+              showLogin(
+                'administrador'
+              );
+          }
+        });
+
+      if (!configured()) return;
+
+      const { data: sessionData } =
+        await client()
+          .auth
+          .getSession();
+
+      if (!sessionData.session) return;
+
+      const { data: perfil } =
+        await client()
+          .from('perfiles')
+          .select(
+            'id,email,nombre,tipo_usuario,activo'
+          )
+          .eq(
+            'id',
+            sessionData.session.user.id
+          )
+          .single();
+
+      if (
+        perfil &&
+        perfil.activo
+      ) {
+        renderPanel(perfil);
+      }
+    }
+  );
 })();
