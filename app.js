@@ -2,6 +2,7 @@
   const cfg = window.PORTAL_CONFIG || {};
   let sb = null;
   let desiredRole = 'administrador';
+  let perfilActual = null;
 
   const get = (id) => document.getElementById(id);
 
@@ -103,19 +104,24 @@
       return;
     }
 
-    if (perfil.tipo_usuario !== desiredRole) {
+    const puedeEntrar =
+      perfil.tipo_usuario === desiredRole ||
+      perfil.tipo_usuario === 'administrador';
+
+    if (!puedeEntrar) {
       alert(
         'Esta cuenta corresponde a "' +
         perfil.tipo_usuario +
-        '" y no al acceso "' +
+        '" y no tiene permiso para entrar como "' +
         desiredRole +
         '".'
       );
       return;
     }
 
+    perfilActual = perfil;
     closeLogin();
-    renderPanel(perfil);
+    renderPanel(perfil, desiredRole);
   }
 
   function logout() {
@@ -125,7 +131,7 @@
     if (get('loginPin')) get('loginPin').value = '';
   }
 
-  function renderPanel(perfil) {
+  function renderPanel(perfil, modoAcceso = perfil.tipo_usuario) {
     const panel = get('panel-usuario');
     if (!panel) return;
 
@@ -134,8 +140,8 @@
     const title = get('panelTitle');
     if (title) {
       title.textContent =
-        perfil.tipo_usuario === 'administrador' ? 'Panel administrativo' :
-        perfil.tipo_usuario === 'autor' ? 'Panel del autor' : 'Panel del lector';
+        modoAcceso === 'administrador' ? 'Panel administrativo' :
+        modoAcceso === 'autor' ? 'Panel del autor' : 'Panel del lector';
     }
 
     const subtitle = get('panelSubtitle');
@@ -145,28 +151,76 @@
 
     const content = get('panelContent');
 
-    if (content && perfil.tipo_usuario === 'administrador') {
-      content.innerHTML = `
-        <div class="cards">
-          <article class="book-card"><div class="card-body">
-            <h3>Administración activa</h3>
-            <p>Tu acceso de Administradora Principal fue validado correctamente mediante correo y NIP.</p>
-          </div></article>
-          <article class="book-card"><div class="card-body">
-            <h3>Usuarios</h3>
-            <p>Desde aquí integraremos lectores, autores y los demás administradores.</p>
-          </div></article>
-          <article class="book-card"><div class="card-body">
-            <h3>Autores y pagos</h3>
-            <p>Este panel incorporará las participaciones del 20% y las liquidaciones bimestrales.</p>
-          </div></article>
-        </div>`;
+    if (content) {
+      if (modoAcceso === 'administrador') {
+        content.innerHTML = `
+          <div class="cards">
+            <article class="book-card"><div class="card-body">
+              <h3>Administración activa</h3>
+              <p>Tu acceso administrativo fue validado correctamente mediante correo y NIP.</p>
+            </div></article>
+            <article class="book-card"><div class="card-body">
+              <h3>Entrar como autor</h3>
+              <p>Usa la misma cuenta para escribir, editar y publicar tus libros.</p>
+              <button class="btn navy" onclick="PortalAuth.cambiarModo('autor')">Panel de autor</button>
+            </div></article>
+            <article class="book-card"><div class="card-body">
+              <h3>Entrar como lector</h3>
+              <p>Usa la misma cuenta para consultar las obras como cualquier lector.</p>
+              <button class="btn navy" onclick="PortalAuth.cambiarModo('lector')">Panel de lector</button>
+            </div></article>
+          </div>`;
+      } else if (modoAcceso === 'autor') {
+        content.innerHTML = `
+          <div class="cards">
+            <article class="book-card"><div class="card-body">
+              <h3>Mis libros</h3>
+              <p>Desde aquí podrás crear, continuar y publicar tus obras.</p>
+            </div></article>
+            ${perfil.tipo_usuario === 'administrador' ? `
+            <article class="book-card"><div class="card-body">
+              <h3>Volver a administración</h3>
+              <button class="btn outline" onclick="PortalAuth.cambiarModo('administrador')">Panel administrativo</button>
+            </div></article>` : ''}
+          </div>`;
+      } else {
+        content.innerHTML = `
+          <div class="cards">
+            <article class="book-card"><div class="card-body">
+              <h3>Biblioteca del lector</h3>
+              <p>Desde aquí podrás acceder a las obras disponibles para lectura.</p>
+            </div></article>
+            ${perfil.tipo_usuario === 'administrador' ? `
+            <article class="book-card"><div class="card-body">
+              <h3>Volver a administración</h3>
+              <button class="btn outline" onclick="PortalAuth.cambiarModo('administrador')">Panel administrativo</button>
+            </div></article>` : ''}
+          </div>`;
+      }
     }
 
     panel.scrollIntoView({ behavior:'smooth' });
   }
 
-  window.PortalAuth = { showLogin, closeLogin, login, logout };
+  function cambiarModo(modo) {
+    if (!perfilActual) {
+      alert('Primero inicia sesión.');
+      return;
+    }
+
+    const permitido =
+      perfilActual.tipo_usuario === modo ||
+      perfilActual.tipo_usuario === 'administrador';
+
+    if (!permitido) {
+      alert('Tu cuenta no tiene permiso para este acceso.');
+      return;
+    }
+
+    renderPanel(perfilActual, modo);
+  }
+
+  window.PortalAuth = { showLogin, closeLogin, login, logout, cambiarModo };
 
   document.addEventListener('DOMContentLoaded', function () {
     hidePasswordField();
