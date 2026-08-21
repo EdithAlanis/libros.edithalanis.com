@@ -1,0 +1,1 @@
+window.PORTAL_CONFIG = window.PORTAL_CONFIG || { SUPABASE_URL: "", SUPABASE_ANON_KEY: "" };

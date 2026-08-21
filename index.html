@@ -134,6 +134,18 @@ a{text-decoration:none;color:inherit}
   </div>
 </section>
 
+
+<section class="section alt" id="acceso-real">
+  <div class="section-head"><div><span class="kicker" style="color:#9b7a37">Acceso seguro</span><h2>Lectores, autores y administradores</h2><p class="section-intro">Cada persona utiliza su propia cuenta. El NIP y la contraseña nunca se publican dentro del código del portal.</p></div></div>
+  <div class="cards">
+    <article class="book-card"><div class="card-body"><h3>Lectores</h3><p>$100 MXN por 30 días. Después de la activación pueden elegir hasta 3 obras, que permanecen fijas hasta la siguiente renovación.</p><button class="btn navy" onclick="PortalAuth.showLogin('reader')">Entrar como lector</button></div></article>
+    <article class="book-card"><div class="card-body"><h3>Autores</h3><p>$500 MXN mensuales. Pueden escribir varios libros, sin límite editorial de páginas ni capítulos, y publicar mediante seudónimo.</p><button class="btn navy" onclick="PortalAuth.showLogin('author')">Entrar como autor</button></div></article>
+    <article class="book-card"><div class="card-body"><h3>Administración</h3><p>El sistema contempla 5 cuentas gratuitas: 1 Administradora Principal y 4 Administradores adicionales, cada una con NIP y contraseña propios.</p><button class="btn gold" onclick="PortalAuth.showLogin('admin')">Acceso administrativo</button></div></article>
+  </div>
+</section>
+<div class="modal" id="secureLoginModal"><div class="backdrop" onclick="PortalAuth.closeLogin()"></div><div class="modal-card" style="max-width:520px"><button class="close" onclick="PortalAuth.closeLogin()">×</button><h2 id="secureLoginTitle">Acceso</h2><div id="secureLoginMessage" class="legal" style="margin-bottom:14px"></div><div class="grid-form"><div class="wide"><input id="loginEmail" type="email" placeholder="Correo electrónico"></div><div><input id="loginPin" inputmode="numeric" maxlength="8" placeholder="NIP"></div><div><input id="loginPassword" type="password" placeholder="Contraseña"></div><div class="wide"><button class="btn navy" style="width:100%" onclick="PortalAuth.login()">Entrar</button></div></div><p class="legal" style="margin-top:12px">Las credenciales se validan contra la base de datos segura. El archivo público de GitHub no contiene contraseñas reales.</p></div></div>
+<section class="section" id="panel-usuario" style="display:none"><div class="section-head"><div><span class="kicker" style="color:#9b7a37">Sesión activa</span><h2 id="panelTitle">Mi panel</h2><p id="panelSubtitle" class="section-intro"></p></div><button class="btn outline" onclick="PortalAuth.logout()">Cerrar sesión</button></div><div id="panelContent"></div></section>
+
 <footer class="footer"><div><strong>Portal Editorial Edith Alanis</strong><br><small>Portal Editorial Edith Alanis · libros.edithalanis.com</small></div><div>© 2026 Portal Editorial Edith Alanis · Todos los derechos reservados</div></footer>
 <div class="modal" id="modal"><div class="backdrop" data-close></div><div class="modal-card"><button class="close" data-close>×</button><div id="modalContent"></div></div></div>
 <script>
@@ -249,6 +261,11 @@ function closeAdminDemo(){
   m.classList.remove('show'); m.setAttribute('aria-hidden','true');
 }
 </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
