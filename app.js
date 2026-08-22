@@ -3,6 +3,9 @@
   let sb = null;
   let desiredRole = 'administrador';
   let perfilActual = null;
+  let credenciales = null;
+  let libroActual = null;
+  let paginaActual = 1;
 
   const get = (id) => document.getElementById(id);
 
@@ -120,11 +123,16 @@
     }
 
     perfilActual = perfil;
+    credenciales = { email, pin };
     closeLogin();
     renderPanel(perfil, desiredRole);
   }
 
   function logout() {
+    perfilActual = null;
+    credenciales = null;
+    libroActual = null;
+
     const panel = get('panel-usuario');
     if (panel) panel.style.display = 'none';
     if (get('loginEmail')) get('loginEmail').value = '';
@@ -156,8 +164,14 @@
         content.innerHTML = `
           <div class="cards">
             <article class="book-card"><div class="card-body">
-              <h3>Administración activa</h3>
-              <p>Tu acceso administrativo fue validado correctamente mediante correo y NIP.</p>
+              <h3>Editor general de libros</h3>
+              <p>Puedes modificar cualquier libro, editar cualquier página e insertar páginas antes o después.</p>
+              <button class="btn navy" onclick="PortalBooks.abrirEditor()">Abrir editor</button>
+            </div></article>
+            <article class="book-card"><div class="card-body">
+              <h3>Visitantes del portal</h3>
+              <p>Consulta visitantes únicos, visitas totales y procedencia geográfica aproximada.</p>
+              <button class="btn navy" onclick="PortalAnalytics.mostrar()">Ver visitantes</button>
             </div></article>
             <article class="book-card"><div class="card-body">
               <h3>Entrar como autor</h3>
@@ -167,7 +181,7 @@
             <article class="book-card"><div class="card-body">
               <h3>Entrar como lector</h3>
               <p>Usa la misma cuenta para consultar las obras como cualquier lector.</p>
-              <button class="btn navy" onclick="PortalAuth.cambiarModo('lector')">Panel de lector</button>
+              <button class="btn outline" onclick="PortalAuth.cambiarModo('lector')">Panel de lector</button>
             </div></article>
           </div>`;
       } else if (modoAcceso === 'autor') {
@@ -175,7 +189,8 @@
           <div class="cards">
             <article class="book-card"><div class="card-body">
               <h3>Mis libros</h3>
-              <p>Desde aquí podrás crear, continuar y publicar tus obras.</p>
+              <p>Puedes leer y editar tus libros completos desde la página 1 hasta el final.</p>
+              <button class="btn navy" onclick="PortalBooks.abrirEditor()">Abrir mis libros</button>
             </div></article>
             ${perfil.tipo_usuario === 'administrador' ? `
             <article class="book-card"><div class="card-body">
@@ -188,7 +203,8 @@
           <div class="cards">
             <article class="book-card"><div class="card-body">
               <h3>Biblioteca del lector</h3>
-              <p>Desde aquí podrás acceder a las obras disponibles para lectura.</p>
+              <p>Las primeras 5 páginas de cada libro están disponibles gratuitamente para cualquier visitante.</p>
+              <button class="btn navy" onclick="document.getElementById('libros')?.scrollIntoView({behavior:'smooth'})">Ver biblioteca</button>
             </div></article>
             ${perfil.tipo_usuario === 'administrador' ? `
             <article class="book-card"><div class="card-body">
@@ -220,10 +236,473 @@
     renderPanel(perfilActual, modo);
   }
 
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+
+  function ensureBookModal() {
+    if (get('portalBookModal')) return;
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="modal" id="portalBookModal">
+        <div class="backdrop" onclick="PortalBooks.cerrarLibro()"></div>
+        <div class="modal-card" style="max-width:900px;max-height:90vh;overflow:auto">
+          <button class="close" onclick="PortalBooks.cerrarLibro()">×</button>
+          <h2 id="portalBookTitle">Libro</h2>
+          <p class="legal" id="portalBookNotice"></p>
+          <div id="portalBookPages"></div>
+        </div>
+      </div>
+    `);
+  }
+
+  function renderPaginasLectura(paginas) {
+    const cont = get('portalBookPages');
+    if (!cont) return;
+
+    if (!paginas.length) {
+      cont.innerHTML = '<p>Este libro todavía no tiene contenido publicado en estas páginas.</p>';
+      return;
+    }
+
+    cont.innerHTML = paginas.map(p => `
+      <article style="background:#fffdf8;border:1px solid #e5dfd2;border-radius:10px;padding:28px;margin:18px 0;min-height:320px">
+        <div style="font-size:12px;letter-spacing:.12em;color:#9b7a37;text-transform:uppercase;margin-bottom:10px">Página ${p.numero}</div>
+        ${p.titulo ? `<h3 style="font-family:Georgia,serif;color:#0b1b36">${escapeHtml(p.titulo)}</h3>` : ''}
+        <div style="white-space:pre-wrap;line-height:1.8;font-family:Georgia,serif;font-size:18px;color:#29251f">${escapeHtml(p.contenido || '') || '<em>Página en preparación.</em>'}</div>
+      </article>
+    `).join('');
+  }
+
+  async function abrirLibroPublicoPorTitulo(titulo) {
+    ensureBookModal();
+
+    const { data: libros, error } = await client().rpc('portal_listar_libros');
+    if (error) {
+      alert('No fue posible abrir el catálogo: ' + error.message);
+      return;
+    }
+
+    const libro = (libros || []).find(x => x.titulo.trim() === titulo.trim());
+    if (!libro) {
+      alert('Este libro todavía no está vinculado a la base de datos.');
+      return;
+    }
+
+    const { data: paginas, error: errPag } = await client().rpc(
+      'portal_leer_muestra',
+      { p_libro_id: libro.id }
+    );
+
+    if (errPag) {
+      alert('No fue posible abrir el libro: ' + errPag.message);
+      return;
+    }
+
+    get('portalBookTitle').textContent = libro.titulo;
+    get('portalBookNotice').textContent =
+      'Lectura gratuita: páginas 1 a 5. No necesitas pagar ni iniciar sesión.';
+    renderPaginasLectura(paginas || []);
+    get('portalBookModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarLibro() {
+    get('portalBookModal')?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function ensureEditorModal() {
+    if (get('portalEditorModal')) return;
+
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="modal" id="portalEditorModal">
+        <div class="backdrop" onclick="PortalBooks.cerrarEditor()"></div>
+        <div class="modal-card" style="max-width:1100px;max-height:94vh;overflow:auto">
+          <button class="close" onclick="PortalBooks.cerrarEditor()">×</button>
+          <h2>Editor de libros</h2>
+          <p class="legal">Administrador: puede modificar cualquier libro. Autor: puede ver y modificar sus libros completos.</p>
+
+          <div class="grid-form" style="margin-bottom:18px">
+            <div class="wide">
+              <label>Libro</label>
+              <select id="editorLibroSelect" style="width:100%;padding:12px;border:1px solid #d6d2c8;border-radius:7px"></select>
+            </div>
+            <div>
+              <label>Página</label>
+              <input id="editorNumero" type="number" min="1" value="1">
+            </div>
+            <div style="display:flex;align-items:end">
+              <button class="btn outline" style="width:100%" onclick="PortalBooks.cargarPagina()">Ir a página</button>
+            </div>
+            <div class="wide">
+              <label>Título de la página</label>
+              <input id="editorTituloPagina" type="text" placeholder="Título opcional">
+            </div>
+            <div class="wide">
+              <label>Contenido</label>
+              <textarea id="editorContenidoPagina" rows="16" style="width:100%;padding:14px;border:1px solid #d6d2c8;border-radius:7px;font:17px/1.7 Georgia,serif" placeholder="Escribe aquí..."></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn navy" onclick="PortalBooks.guardarPagina()">Guardar página</button>
+            <button class="btn outline" onclick="PortalBooks.insertarAntes()">Insertar antes</button>
+            <button class="btn outline" onclick="PortalBooks.insertarDespues()">Insertar después</button>
+            <button class="btn outline" onclick="PortalBooks.anterior()">← Anterior</button>
+            <button class="btn outline" onclick="PortalBooks.siguiente()">Siguiente →</button>
+            <button class="btn outline" onclick="PortalBooks.eliminarPagina()" style="border-color:#b84b45;color:#8f302b">Eliminar página</button>
+          </div>
+
+          <p id="editorEstado" class="legal" style="margin-top:12px"></p>
+
+          <hr style="margin:24px 0;border:0;border-top:1px solid #ddd">
+          <h3>Crear un libro nuevo</h3>
+          <div class="grid-form">
+            <div><input id="nuevoLibroTitulo" placeholder="Título del libro"></div>
+            <div><input id="nuevoLibroEdad" placeholder="Edad recomendada"></div>
+            <div class="wide"><button class="btn navy" onclick="PortalBooks.crearLibro()">Crear libro</button></div>
+          </div>
+        </div>
+      </div>
+    `);
+
+    get('editorLibroSelect').addEventListener('change', async () => {
+      libroActual = get('editorLibroSelect').value || null;
+      paginaActual = 1;
+      get('editorNumero').value = 1;
+      await cargarPagina();
+    });
+  }
+
+  async function abrirEditor() {
+    if (!perfilActual || !credenciales) {
+      alert('Primero inicia sesión como administrador o autor.');
+      return;
+    }
+
+    ensureEditorModal();
+
+    const { data, error } = await client().rpc('portal_libros_editor', {
+      p_email: credenciales.email,
+      p_nip: credenciales.pin
+    });
+
+    if (error) {
+      alert('No fue posible cargar los libros: ' + error.message);
+      return;
+    }
+
+    const select = get('editorLibroSelect');
+    select.innerHTML = (data || []).map(l =>
+      `<option value="${l.id}">${escapeHtml(l.titulo)} (${l.total_paginas || 0} páginas)</option>`
+    ).join('');
+
+    if (!data || !data.length) {
+      select.innerHTML = '<option value="">No hay libros asignados</option>';
+      libroActual = null;
+    } else {
+      libroActual = data[0].id;
+      paginaActual = 1;
+      get('editorNumero').value = 1;
+      await cargarPagina();
+    }
+
+    get('portalEditorModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarEditor() {
+    get('portalEditorModal')?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  async function obtenerLibroCompleto() {
+    if (!libroActual) return [];
+    const { data, error } = await client().rpc('portal_leer_libro_completo', {
+      p_email: credenciales.email,
+      p_nip: credenciales.pin,
+      p_libro_id: libroActual
+    });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function cargarPagina() {
+    if (!libroActual) return;
+
+    const n = Math.max(1, parseInt(get('editorNumero').value || '1', 10));
+    paginaActual = n;
+    get('editorNumero').value = n;
+
+    try {
+      const paginas = await obtenerLibroCompleto();
+      const p = paginas.find(x => Number(x.numero) === n);
+      get('editorTituloPagina').value = p?.titulo || '';
+      get('editorContenidoPagina').value = p?.contenido || '';
+      get('editorEstado').textContent = p
+        ? `Página ${n} cargada.`
+        : `La página ${n} aún no existe. Escribe contenido y pulsa Guardar página.`;
+    } catch (e) {
+      alert('No fue posible cargar la página: ' + e.message);
+    }
+  }
+
+  async function guardarPagina() {
+    if (!libroActual) return;
+
+    const numero = Math.max(1, parseInt(get('editorNumero').value || '1', 10));
+
+    const { error } = await client().rpc('portal_guardar_pagina', {
+      p_email: credenciales.email,
+      p_nip: credenciales.pin,
+      p_libro_id: libroActual,
+      p_numero: numero,
+      p_titulo: get('editorTituloPagina').value || '',
+      p_contenido: get('editorContenidoPagina').value || ''
+    });
+
+    if (error) {
+      alert('No fue posible guardar: ' + error.message);
+      return;
+    }
+
+    paginaActual = numero;
+    get('editorEstado').textContent = `Página ${numero} guardada correctamente.`;
+  }
+
+  async function insertarEn(numero) {
+    if (!libroActual) return;
+
+    const { error } = await client().rpc('portal_insertar_pagina', {
+      p_email: credenciales.email,
+      p_nip: credenciales.pin,
+      p_libro_id: libroActual,
+      p_numero: numero,
+      p_titulo: '',
+      p_contenido: ''
+    });
+
+    if (error) {
+      alert('No fue posible insertar la página: ' + error.message);
+      return;
+    }
+
+    paginaActual = numero;
+    get('editorNumero').value = numero;
+    await cargarPagina();
+  }
+
+  async function insertarAntes() {
+    await insertarEn(Math.max(1, paginaActual));
+  }
+
+  async function insertarDespues() {
+    await insertarEn(paginaActual + 1);
+  }
+
+  async function eliminarPagina() {
+    if (!libroActual) return;
+    if (!confirm(`¿Eliminar la página ${paginaActual}?`)) return;
+
+    const { error } = await client().rpc('portal_eliminar_pagina', {
+      p_email: credenciales.email,
+      p_nip: credenciales.pin,
+      p_libro_id: libroActual,
+      p_numero: paginaActual
+    });
+
+    if (error) {
+      alert('No fue posible eliminar: ' + error.message);
+      return;
+    }
+
+    await cargarPagina();
+  }
+
+  async function anterior() {
+    get('editorNumero').value = Math.max(1, paginaActual - 1);
+    await cargarPagina();
+  }
+
+  async function siguiente() {
+    get('editorNumero').value = paginaActual + 1;
+    await cargarPagina();
+  }
+
+  async function crearLibro() {
+    const titulo = (get('nuevoLibroTitulo').value || '').trim();
+    const edad = (get('nuevoLibroEdad').value || '').trim();
+
+    if (!titulo) {
+      alert('Escribe el título del libro.');
+      return;
+    }
+
+    const { error } = await client().rpc('portal_crear_libro', {
+      p_email: credenciales.email,
+      p_nip: credenciales.pin,
+      p_titulo: titulo,
+      p_edad: edad
+    });
+
+    if (error) {
+      alert('No fue posible crear el libro: ' + error.message);
+      return;
+    }
+
+    get('nuevoLibroTitulo').value = '';
+    get('nuevoLibroEdad').value = '';
+    alert('Libro creado correctamente.');
+    await abrirEditor();
+  }
+
+  function getVisitorId() {
+    let id = localStorage.getItem('portal_visitante_id');
+    if (!id) {
+      id = crypto.randomUUID ? crypto.randomUUID() :
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      localStorage.setItem('portal_visitante_id', id);
+    }
+    return id;
+  }
+
+  async function detectarUbicacionAproximada() {
+    const fallback = {
+      pais: '',
+      region: '',
+      ciudad: '',
+      zona_horaria: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      idioma: navigator.language || ''
+    };
+
+    try {
+      const r = await fetch('https://ipapi.co/json/', { cache:'no-store' });
+      if (!r.ok) return fallback;
+      const g = await r.json();
+
+      return {
+        pais: g.country_name || '',
+        region: g.region || '',
+        ciudad: g.city || '',
+        zona_horaria: g.timezone || fallback.zona_horaria,
+        idioma: navigator.language || ''
+      };
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  async function registrarVisita() {
+    if (!configured()) return;
+
+    try {
+      const geo = await detectarUbicacionAproximada();
+
+      await client().rpc('portal_registrar_visita', {
+        p_visitante_id: getVisitorId(),
+        p_pagina: location.pathname + location.hash,
+        p_pais: geo.pais,
+        p_region: geo.region,
+        p_ciudad: geo.ciudad,
+        p_zona_horaria: geo.zona_horaria,
+        p_idioma: geo.idioma
+      });
+    } catch (_) {}
+  }
+
+  async function mostrarAnalitica() {
+    if (!perfilActual || perfilActual.tipo_usuario !== 'administrador' || !credenciales) {
+      alert('Acceso administrativo requerido.');
+      return;
+    }
+
+    const { data, error } = await client().rpc('portal_resumen_visitas', {
+      p_email: credenciales.email,
+      p_nip: credenciales.pin
+    });
+
+    if (error) {
+      alert('No fue posible consultar las visitas: ' + error.message);
+      return;
+    }
+
+    const content = get('panelContent');
+    if (!content) return;
+
+    content.innerHTML = `
+      <div class="cards">
+        <article class="book-card"><div class="card-body">
+          <h3>${data?.visitantes_unicos || 0}</h3>
+          <p>Visitantes únicos</p>
+        </div></article>
+        <article class="book-card"><div class="card-body">
+          <h3>${data?.visitas_totales || 0}</h3>
+          <p>Visitas totales</p>
+        </div></article>
+        <article class="book-card"><div class="card-body">
+          <h3>${data?.hoy || 0}</h3>
+          <p>Visitas de hoy</p>
+        </div></article>
+        <article class="book-card"><div class="card-body">
+          <h3>${data?.ultimos_30_dias || 0}</h3>
+          <p>Visitas últimos 30 días</p>
+        </div></article>
+      </div>
+      <p class="legal" style="margin-top:16px">La procedencia geográfica se registra de forma aproximada. El portal no almacena la dirección IP.</p>
+      <button class="btn outline" style="margin-top:12px" onclick="PortalAuth.cambiarModo('administrador')">Volver al panel administrativo</button>
+    `;
+  }
+
+  function conectarTarjetasCatalogo() {
+    document.querySelectorAll('#bookGrid .book-card').forEach(card => {
+      const titulo = card.querySelector('h3')?.textContent.trim();
+      if (!titulo) return;
+
+      card.querySelectorAll('button').forEach(btn => {
+        const texto = btn.textContent.trim().toLowerCase();
+        if (texto === 'ver libro' || texto === 'leer lo nuevo') {
+          btn.removeAttribute('data-read');
+          btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            abrirLibroPublicoPorTitulo(titulo);
+          };
+        }
+      });
+    });
+  }
+
   window.PortalAuth = { showLogin, closeLogin, login, logout, cambiarModo };
+
+  window.PortalBooks = {
+    abrirLibroPublicoPorTitulo,
+    cerrarLibro,
+    abrirEditor,
+    cerrarEditor,
+    cargarPagina,
+    guardarPagina,
+    insertarAntes,
+    insertarDespues,
+    eliminarPagina,
+    anterior,
+    siguiente,
+    crearLibro
+  };
+
+  window.PortalAnalytics = { mostrar: mostrarAnalitica };
 
   document.addEventListener('DOMContentLoaded', function () {
     hidePasswordField();
+    registrarVisita();
 
     const top = get('topSecureLogin');
     if (top) top.onclick = () => showLogin('administrador');
@@ -234,5 +713,7 @@
         btn.onclick = () => showLogin('administrador');
       }
     });
+
+    setTimeout(conectarTarjetasCatalogo, 100);
   });
 })();

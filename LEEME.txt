@@ -1,0 +1,21 @@
+PORTAL EDITORIAL EDITH ALANIS - ACTUALIZACIÓN
+
+Supabase:
+- El bloque SQL de editor de libros + visitas ya fue ejecutado con éxito.
+- No es necesario volver a ejecutarlo.
+
+GitHub:
+1. Reemplaza index.html por el index.html de este paquete.
+2. Reemplaza app.js por el app.js de este paquete.
+3. NO cambies config.js.
+4. Conserva para_nicolas_portada.png en la raíz del repositorio.
+5. Commit changes.
+6. Espera 1-2 minutos y presiona Ctrl+F5 en libros.edithalanis.com.
+
+Incluye:
+- Administradores: pueden editar cualquier libro.
+- Administradores: pueden entrar también como autor y lector.
+- Autores: pueden leer y editar sus libros completos.
+- Visitantes: primeras 5 páginas gratis sin iniciar sesión.
+- Editor por página: guardar, insertar antes/después, eliminar y navegar.
+- Analítica: visitantes únicos, visitas totales y ubicación aproximada.
