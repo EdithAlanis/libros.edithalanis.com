@@ -1,21 +1,48 @@
-PORTAL EDITORIAL EDITH ALANIS - ACTUALIZACIÓN
+PORTAL EDITORIAL EDITH ALANIS
+ACTUALIZACION VIDA Y OBRA + IMAGENES POR PAGINA
 
-Supabase:
-- El bloque SQL de editor de libros + visitas ya fue ejecutado con éxito.
-- No es necesario volver a ejecutarlo.
+1) SUPABASE
+   - Ve a SQL Editor > New query.
+   - Ejecuta UNA SOLA VEZ:
+     actualizacion_jose_isidro_imagenes.sql
+   - Debe aparecer: Success. No rows returned.
 
-GitHub:
-1. Reemplaza index.html por el index.html de este paquete.
-2. Reemplaza app.js por el app.js de este paquete.
-3. NO cambies config.js.
-4. Conserva para_nicolas_portada.png en la raíz del repositorio.
-5. Commit changes.
-6. Espera 1-2 minutos y presiona Ctrl+F5 en libros.edithalanis.com.
+2) GITHUB
+   Reemplaza:
+   - index.html
+   - app.js
 
-Incluye:
-- Administradores: pueden editar cualquier libro.
-- Administradores: pueden entrar también como autor y lector.
-- Autores: pueden leer y editar sus libros completos.
-- Visitantes: primeras 5 páginas gratis sin iniciar sesión.
-- Editor por página: guardar, insertar antes/después, eliminar y navegar.
-- Analítica: visitantes únicos, visitas totales y ubicación aproximada.
+   Sube también:
+   - portada_vida_obra_jose_isidro.png
+   - para_nicolas_portada.png (si no está ya en la raíz)
+   - opcionalmente la carpeta imagenes_libro_jose_isidro
+
+   NO CAMBIES config.js.
+
+3) CAMBIOS
+   Vida y Obra de José Isidro Alanis M:
+   - Autora: Edith Alanis
+   - Libro terminado
+   - 26 páginas
+   - Lectura completa gratuita
+   - Descarga digital: $500 MXN
+   - Nueva portada
+
+   Cuento para Manuel la no discapacidad:
+   - Autora: Edith Alanis
+   - Lectura completa gratuita
+
+   Para Nicolás y su amigo especial:
+   - Autora: Edith Alanis
+   - 5 primeras páginas gratuitas
+   - Continuación con acceso de pago
+
+4) IMAGENES DENTRO DE LOS LIBROS
+   En el editor de cada página podrás:
+   - seleccionar una imagen desde tu computadora;
+   - verla antes de guardar;
+   - colocarla arriba o abajo del texto;
+   - escribir un pie de imagen;
+   - quitarla o sustituirla después.
+
+Las imágenes se comprimen en el navegador antes de guardarse.

@@ -6,6 +6,7 @@
   let credenciales = null;
   let libroActual = null;
   let paginaActual = 1;
+  let imagenPaginaData = null;
 
   const get = (id) => document.getElementById(id);
 
@@ -265,17 +266,29 @@
     if (!cont) return;
 
     if (!paginas.length) {
-      cont.innerHTML = '<p>Este libro todavía no tiene contenido publicado en estas páginas.</p>';
+      cont.innerHTML = '<p>Este libro todavía no tiene contenido publicado.</p>';
       return;
     }
 
-    cont.innerHTML = paginas.map(p => `
-      <article style="background:#fffdf8;border:1px solid #e5dfd2;border-radius:10px;padding:28px;margin:18px 0;min-height:320px">
-        <div style="font-size:12px;letter-spacing:.12em;color:#9b7a37;text-transform:uppercase;margin-bottom:10px">Página ${p.numero}</div>
-        ${p.titulo ? `<h3 style="font-family:Georgia,serif;color:#0b1b36">${escapeHtml(p.titulo)}</h3>` : ''}
-        <div style="white-space:pre-wrap;line-height:1.8;font-family:Georgia,serif;font-size:18px;color:#29251f">${escapeHtml(p.contenido || '') || '<em>Página en preparación.</em>'}</div>
-      </article>
-    `).join('');
+    cont.innerHTML = paginas.map(p => {
+      const imagen = p.imagen_data ? `
+        <figure style="margin:20px 0;text-align:center">
+          <img src="${p.imagen_data}" alt="${escapeHtml(p.imagen_pie || 'Imagen del libro')}"
+               style="max-width:100%;max-height:520px;object-fit:contain;border-radius:8px">
+          ${p.imagen_pie ? `<figcaption style="font-size:13px;color:#6d7480;margin-top:8px">${escapeHtml(p.imagen_pie)}</figcaption>` : ''}
+        </figure>` : '';
+
+      const texto = `<div style="white-space:pre-wrap;line-height:1.8;font-family:Georgia,serif;font-size:18px;color:#29251f">${escapeHtml(p.contenido || '') || '<em>Página en preparación.</em>'}</div>`;
+
+      return `
+        <article style="background:#fffdf8;border:1px solid #e5dfd2;border-radius:10px;padding:28px;margin:18px 0;min-height:320px">
+          <div style="font-size:12px;letter-spacing:.12em;color:#9b7a37;text-transform:uppercase;margin-bottom:10px">Página ${p.numero}</div>
+          ${p.titulo ? `<h3 style="font-family:Georgia,serif;color:#0b1b36">${escapeHtml(p.titulo)}</h3>` : ''}
+          ${p.imagen_posicion === 'arriba' ? imagen : ''}
+          ${texto}
+          ${p.imagen_posicion === 'abajo' ? imagen : ''}
+        </article>`;
+    }).join('');
   }
 
   async function abrirLibroPublicoPorTitulo(titulo) {
@@ -304,9 +317,19 @@
     }
 
     get('portalBookTitle').textContent = libro.titulo;
-    get('portalBookNotice').textContent =
-      'Lectura gratuita: páginas 1 a 5. No necesitas pagar ni iniciar sesión.';
+    get('portalBookNotice').textContent = libro.lectura_gratuita
+      ? 'Lectura completa gratuita.'
+      : 'Muestra gratuita: páginas 1 a 5. Para continuar se requiere acceso de pago.';
     renderPaginasLectura(paginas || []);
+
+    if (libro.precio_descarga) {
+      get('portalBookPages').insertAdjacentHTML('beforeend', `
+        <div style="margin-top:20px;padding:18px;border:1px solid #d6c39b;border-radius:8px;background:#fffaf0">
+          <b>Descarga digital del libro completo: $${Number(libro.precio_descarga).toFixed(0)} MXN</b>
+          <p style="margin:8px 0 0">La lectura en línea es gratuita; la descarga digital tiene costo.</p>
+        </div>
+      `);
+    }
     get('portalBookModal').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -347,6 +370,26 @@
               <label>Contenido</label>
               <textarea id="editorContenidoPagina" rows="16" style="width:100%;padding:14px;border:1px solid #d6d2c8;border-radius:7px;font:17px/1.7 Georgia,serif" placeholder="Escribe aquí..."></textarea>
             </div>
+
+            <div class="wide" style="border-top:1px solid #e5e0d5;padding-top:16px">
+              <label>Imagen de esta página</label>
+              <input id="editorImagenArchivo" type="file" accept="image/*">
+              <div id="editorImagenPreview" style="margin-top:12px"></div>
+            </div>
+            <div>
+              <label>Posición de la imagen</label>
+              <select id="editorImagenPosicion">
+                <option value="arriba">Arriba del texto</option>
+                <option value="abajo">Abajo del texto</option>
+              </select>
+            </div>
+            <div>
+              <label>Pie de imagen</label>
+              <input id="editorImagenPie" type="text" placeholder="Descripción opcional">
+            </div>
+            <div class="wide">
+              <button type="button" class="btn outline" onclick="PortalBooks.quitarImagen()">Quitar imagen de esta página</button>
+            </div>
           </div>
 
           <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -377,6 +420,60 @@
       get('editorNumero').value = 1;
       await cargarPagina();
     });
+
+    get('editorImagenArchivo').addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        imagenPaginaData = await comprimirImagen(file);
+        mostrarPreviewImagen();
+      } catch (err) {
+        alert('No fue posible procesar la imagen: ' + err.message);
+      }
+    });
+  }
+
+  function comprimirImagen(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('No se pudo leer el archivo.'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('El archivo no es una imagen válida.'));
+        img.onload = () => {
+          const max = 1000;
+          let w = img.width;
+          let h = img.height;
+          const scale = Math.min(1, max / Math.max(w, h));
+          w = Math.max(1, Math.round(w * scale));
+          h = Math.max(1, Math.round(h * scale));
+
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.76));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function mostrarPreviewImagen() {
+    const box = get('editorImagenPreview');
+    if (!box) return;
+    box.innerHTML = imagenPaginaData
+      ? `<img src="${imagenPaginaData}" alt="Vista previa" style="max-width:100%;max-height:300px;object-fit:contain;border:1px solid #ddd;border-radius:8px">`
+      : '<span class="legal">Esta página no tiene imagen.</span>';
+  }
+
+  function quitarImagen() {
+    imagenPaginaData = null;
+    if (get('editorImagenArchivo')) get('editorImagenArchivo').value = '';
+    if (get('editorImagenPie')) get('editorImagenPie').value = '';
+    mostrarPreviewImagen();
   }
 
   async function abrirEditor() {
@@ -444,6 +541,11 @@
       const p = paginas.find(x => Number(x.numero) === n);
       get('editorTituloPagina').value = p?.titulo || '';
       get('editorContenidoPagina').value = p?.contenido || '';
+      imagenPaginaData = p?.imagen_data || null;
+      if (get('editorImagenPie')) get('editorImagenPie').value = p?.imagen_pie || '';
+      if (get('editorImagenPosicion')) get('editorImagenPosicion').value = p?.imagen_posicion || 'arriba';
+      if (get('editorImagenArchivo')) get('editorImagenArchivo').value = '';
+      mostrarPreviewImagen();
       get('editorEstado').textContent = p
         ? `Página ${n} cargada.`
         : `La página ${n} aún no existe. Escribe contenido y pulsa Guardar página.`;
@@ -463,7 +565,10 @@
       p_libro_id: libroActual,
       p_numero: numero,
       p_titulo: get('editorTituloPagina').value || '',
-      p_contenido: get('editorContenidoPagina').value || ''
+      p_contenido: get('editorContenidoPagina').value || '',
+      p_imagen_data: imagenPaginaData || '',
+      p_imagen_pie: get('editorImagenPie')?.value || '',
+      p_imagen_posicion: get('editorImagenPosicion')?.value || 'arriba'
     });
 
     if (error) {
@@ -695,7 +800,8 @@
     eliminarPagina,
     anterior,
     siguiente,
-    crearLibro
+    crearLibro,
+    quitarImagen
   };
 
   window.PortalAnalytics = { mostrar: mostrarAnalitica };
