@@ -1,48 +1,20 @@
-PORTAL EDITORIAL EDITH ALANIS
-ACTUALIZACION VIDA Y OBRA + IMAGENES POR PAGINA
+CATALOGO DINAMICO - PORTAL EDITORIAL EDITH ALANIS
 
-1) SUPABASE
-   - Ve a SQL Editor > New query.
-   - Ejecuta UNA SOLA VEZ:
-     actualizacion_jose_isidro_imagenes.sql
-   - Debe aparecer: Success. No rows returned.
+Este cambio NO reemplaza app.js.
 
-2) GITHUB
-   Reemplaza:
-   - index.html
-   - app.js
+En GitHub:
+1. Reemplaza index.html por el de este ZIP.
+2. Sube catalogo-dinamico.js a la raíz del repositorio.
+3. NO cambies app.js.
+4. NO cambies config.js.
+5. Commit changes.
+6. Espera 1-2 minutos y presiona Ctrl+F5.
 
-   Sube también:
-   - portada_vida_obra_jose_isidro.png
-   - para_nicolas_portada.png (si no está ya en la raíz)
-   - opcionalmente la carpeta imagenes_libro_jose_isidro
-
-   NO CAMBIES config.js.
-
-3) CAMBIOS
-   Vida y Obra de José Isidro Alanis M:
-   - Autora: Edith Alanis
-   - Libro terminado
-   - 26 páginas
-   - Lectura completa gratuita
-   - Descarga digital: $500 MXN
-   - Nueva portada
-
-   Cuento para Manuel la no discapacidad:
-   - Autora: Edith Alanis
-   - Lectura completa gratuita
-
-   Para Nicolás y su amigo especial:
-   - Autora: Edith Alanis
-   - 5 primeras páginas gratuitas
-   - Continuación con acceso de pago
-
-4) IMAGENES DENTRO DE LOS LIBROS
-   En el editor de cada página podrás:
-   - seleccionar una imagen desde tu computadora;
-   - verla antes de guardar;
-   - colocarla arriba o abajo del texto;
-   - escribir un pie de imagen;
-   - quitarla o sustituirla después.
-
-Las imágenes se comprimen en el navegador antes de guardarse.
+RESULTADO:
+- La biblioteca ya no depende de una lista fija.
+- Todos los libros con publicado=true en public.portal_libros aparecen automáticamente.
+- Cuentos Cortos aparecerá sin agregarlo manualmente a GitHub.
+- Los libros nuevos creados en el futuro aparecerán automáticamente.
+- Toma de Supabase título, autor, número de páginas, edad, estado, modalidad gratuita/de pago y portada_url.
+- Los libros gratuitos abren todo el contenido.
+- Los libros de pago muestran las primeras 5 páginas mediante portal_leer_muestra().
