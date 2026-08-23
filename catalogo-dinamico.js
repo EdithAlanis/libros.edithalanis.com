@@ -199,11 +199,67 @@ function renderCuentoManuel(paginasNuevas = []) {
   }
 
   async function leerLibro(libroId, titulo, gratis, precioDescarga) {
-    const c = client();
-    if (!c) {
-      alert('No se pudo conectar con Supabase.');
-      return;
-    }
+  const c = client();
+
+  if (!c) {
+    alert('No se pudo conectar con Supabase.');
+    return;
+  }
+
+  ensureReaderModal();
+
+  const { data, error } = await c.rpc('portal_leer_muestra', {
+    p_libro_id: libroId
+  });
+
+  if (error) {
+    alert('No fue posible abrir el libro: ' + error.message);
+    return;
+  }
+
+  document.getElementById('catalogReaderTitle').textContent = titulo;
+
+  if (esCuentoManuel(titulo)) {
+
+    document.getElementById('catalogReaderNotice').textContent =
+      'Lectura completa gratuita · Edición original de 61 páginas + continuación de la obra.';
+
+    renderCuentoManuel(data || []);
+
+  } else {
+
+    document.getElementById('catalogReaderNotice').textContent = gratis
+      ? 'Lectura completa gratuita.'
+      : 'Muestra gratuita: primeras 5 páginas. Para continuar se requiere acceso de pago.';
+
+    renderPages(data || []);
+  }
+
+  if (precioDescarga) {
+    document.getElementById('catalogReaderPages').insertAdjacentHTML(
+      'beforeend',
+      `
+        <div style="
+          margin-top:20px;
+          padding:18px;
+          border:1px solid #d6c39b;
+          border-radius:8px;
+          background:#fffaf0">
+
+          <b>Comprar la versión actual: $${Number(precioDescarga).toFixed(0)} MXN</b>
+
+          <p style="margin:8px 0 0">
+            La lectura en línea es gratuita. La compra corresponde a la versión
+            de la obra existente en el momento de realizarla.
+          </p>
+        </div>
+      `
+    );
+  }
+
+  document.getElementById('catalogReaderModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 
     ensureReaderModal();
 
@@ -282,7 +338,10 @@ function renderCuentoManuel(paginasNuevas = []) {
     grid.innerHTML = '';
 
     libros.forEach(libro => {
-      const total = Number(libro.total_paginas || 0);
+      const totalBD = Number(libro.total_paginas || 0);
+const total = esCuentoManuel(libro.titulo)
+  ? 61 + Math.max(0, totalBD - 5)
+  : totalBD;
       const edad = libro.edad_recomendada ? ` · Edad recomendada: ${esc(libro.edad_recomendada)}` : '';
       const estado = libro.terminado ? 'Libro terminado' :
         (libro.estado === 'terminado' ? 'Libro terminado' : 'Escribiéndose actualmente');
