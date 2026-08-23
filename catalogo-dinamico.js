@@ -32,7 +32,138 @@
       </div>
     `);
   }
+function esCuentoManuel(titulo) {
+  return String(titulo || '')
+    .trim()
+    .toLowerCase()
+    .includes('cuento para manuel');
+}
 
+function renderCuentoManuel(paginasNuevas = []) {
+  const cont = document.getElementById('catalogReaderPages');
+  if (!cont) return;
+
+  const originales = Array.from({ length: 61 }, (_, i) => {
+    const numero = i + 1;
+    const archivo = `pagina_${String(numero).padStart(3, '0')}.webp`;
+
+    return `
+      <article style="
+        background:#f3efe6;
+        border:1px solid #d8d1c3;
+        border-radius:10px;
+        padding:18px;
+        margin:22px 0;
+        text-align:center">
+        
+        <div style="
+          font-size:12px;
+          letter-spacing:.12em;
+          color:#9b7a37;
+          text-transform:uppercase;
+          margin-bottom:12px">
+          Página ${numero} · Edición original
+        </div>
+
+        <img
+          src="${archivo}"
+          alt="Cuento para Manuel - página ${numero}"
+          loading="lazy"
+          style="
+            display:block;
+            width:auto;
+            max-width:100%;
+            max-height:none;
+            margin:0 auto;
+            background:white;
+            box-shadow:0 5px 20px rgba(0,0,0,.12)">
+      </article>
+    `;
+  }).join('');
+
+  const continuacion = (paginasNuevas || [])
+    .filter(p => Number(p.numero) >= 62)
+    .map(p => {
+      const imagen = p.imagen_data ? `
+        <figure style="margin:20px 0;text-align:center">
+          <img
+            src="${p.imagen_data}"
+            alt="${esc(p.imagen_pie || 'Imagen del cuento')}"
+            style="max-width:100%;max-height:520px;object-fit:contain;border-radius:8px">
+          ${p.imagen_pie ? `
+            <figcaption style="font-size:13px;color:#6d7480;margin-top:8px">
+              ${esc(p.imagen_pie)}
+            </figcaption>` : ''}
+        </figure>` : '';
+
+      return `
+        <article style="
+          background:#fffdf8;
+          border:1px solid #e5dfd2;
+          border-radius:10px;
+          padding:28px;
+          margin:18px 0;
+          min-height:300px">
+
+          <div style="
+            font-size:12px;
+            letter-spacing:.12em;
+            color:#9b7a37;
+            text-transform:uppercase;
+            margin-bottom:10px">
+            Página ${p.numero} · Continuación
+          </div>
+
+          ${p.titulo ? `
+            <h3 style="font-family:Georgia,serif;color:#0b1b36">
+              ${esc(p.titulo)}
+            </h3>` : ''}
+
+          ${p.imagen_posicion === 'arriba' ? imagen : ''}
+
+          <div style="
+            white-space:pre-wrap;
+            line-height:1.8;
+            font-family:Georgia,serif;
+            font-size:18px;
+            color:#29251f">
+            ${esc(p.contenido || '') || '<em>Página en preparación.</em>'}
+          </div>
+
+          ${p.imagen_posicion === 'abajo' ? imagen : ''}
+        </article>
+      `;
+    }).join('');
+
+  cont.innerHTML = `
+    <div style="
+      padding:16px 18px;
+      margin-bottom:18px;
+      background:#eef5f8;
+      border:1px solid #bfd5df;
+      border-radius:8px">
+      <b>Edición original protegida</b>
+      <p style="margin:7px 0 0">
+        Las páginas 1 a 61 se muestran exactamente como fueron entregadas.
+        La continuación de la obra comienza en la página 62.
+      </p>
+    </div>
+
+    ${originales}
+
+    ${continuacion ? `
+      <div style="
+        margin:35px 0 18px;
+        padding:18px;
+        background:#0b1b36;
+        color:white;
+        border-radius:8px">
+        <b>Continuación de la obra</b>
+      </div>
+      ${continuacion}
+    ` : ''}
+  `;
+}
   function renderPages(paginas) {
     const cont = document.getElementById('catalogReaderPages');
 
