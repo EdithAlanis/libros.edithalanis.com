@@ -1,0 +1,253 @@
+{
+  "titulo": "Cuento para Manuel la no discapacidad",
+  "paginas_originales": 61,
+  "inicio_continuacion_editable": 62,
+  "lectura_gratuita": true,
+  "precio_descarga_mxn": 500,
+  "archivos": [
+    {
+      "pagina": 1,
+      "archivo": "paginas_originales/pagina_001.webp"
+    },
+    {
+      "pagina": 2,
+      "archivo": "paginas_originales/pagina_002.webp"
+    },
+    {
+      "pagina": 3,
+      "archivo": "paginas_originales/pagina_003.webp"
+    },
+    {
+      "pagina": 4,
+      "archivo": "paginas_originales/pagina_004.webp"
+    },
+    {
+      "pagina": 5,
+      "archivo": "paginas_originales/pagina_005.webp"
+    },
+    {
+      "pagina": 6,
+      "archivo": "paginas_originales/pagina_006.webp"
+    },
+    {
+      "pagina": 7,
+      "archivo": "paginas_originales/pagina_007.webp"
+    },
+    {
+      "pagina": 8,
+      "archivo": "paginas_originales/pagina_008.webp"
+    },
+    {
+      "pagina": 9,
+      "archivo": "paginas_originales/pagina_009.webp"
+    },
+    {
+      "pagina": 10,
+      "archivo": "paginas_originales/pagina_010.webp"
+    },
+    {
+      "pagina": 11,
+      "archivo": "paginas_originales/pagina_011.webp"
+    },
+    {
+      "pagina": 12,
+      "archivo": "paginas_originales/pagina_012.webp"
+    },
+    {
+      "pagina": 13,
+      "archivo": "paginas_originales/pagina_013.webp"
+    },
+    {
+      "pagina": 14,
+      "archivo": "paginas_originales/pagina_014.webp"
+    },
+    {
+      "pagina": 15,
+      "archivo": "paginas_originales/pagina_015.webp"
+    },
+    {
+      "pagina": 16,
+      "archivo": "paginas_originales/pagina_016.webp"
+    },
+    {
+      "pagina": 17,
+      "archivo": "paginas_originales/pagina_017.webp"
+    },
+    {
+      "pagina": 18,
+      "archivo": "paginas_originales/pagina_018.webp"
+    },
+    {
+      "pagina": 19,
+      "archivo": "paginas_originales/pagina_019.webp"
+    },
+    {
+      "pagina": 20,
+      "archivo": "paginas_originales/pagina_020.webp"
+    },
+    {
+      "pagina": 21,
+      "archivo": "paginas_originales/pagina_021.webp"
+    },
+    {
+      "pagina": 22,
+      "archivo": "paginas_originales/pagina_022.webp"
+    },
+    {
+      "pagina": 23,
+      "archivo": "paginas_originales/pagina_023.webp"
+    },
+    {
+      "pagina": 24,
+      "archivo": "paginas_originales/pagina_024.webp"
+    },
+    {
+      "pagina": 25,
+      "archivo": "paginas_originales/pagina_025.webp"
+    },
+    {
+      "pagina": 26,
+      "archivo": "paginas_originales/pagina_026.webp"
+    },
+    {
+      "pagina": 27,
+      "archivo": "paginas_originales/pagina_027.webp"
+    },
+    {
+      "pagina": 28,
+      "archivo": "paginas_originales/pagina_028.webp"
+    },
+    {
+      "pagina": 29,
+      "archivo": "paginas_originales/pagina_029.webp"
+    },
+    {
+      "pagina": 30,
+      "archivo": "paginas_originales/pagina_030.webp"
+    },
+    {
+      "pagina": 31,
+      "archivo": "paginas_originales/pagina_031.webp"
+    },
+    {
+      "pagina": 32,
+      "archivo": "paginas_originales/pagina_032.webp"
+    },
+    {
+      "pagina": 33,
+      "archivo": "paginas_originales/pagina_033.webp"
+    },
+    {
+      "pagina": 34,
+      "archivo": "paginas_originales/pagina_034.webp"
+    },
+    {
+      "pagina": 35,
+      "archivo": "paginas_originales/pagina_035.webp"
+    },
+    {
+      "pagina": 36,
+      "archivo": "paginas_originales/pagina_036.webp"
+    },
+    {
+      "pagina": 37,
+      "archivo": "paginas_originales/pagina_037.webp"
+    },
+    {
+      "pagina": 38,
+      "archivo": "paginas_originales/pagina_038.webp"
+    },
+    {
+      "pagina": 39,
+      "archivo": "paginas_originales/pagina_039.webp"
+    },
+    {
+      "pagina": 40,
+      "archivo": "paginas_originales/pagina_040.webp"
+    },
+    {
+      "pagina": 41,
+      "archivo": "paginas_originales/pagina_041.webp"
+    },
+    {
+      "pagina": 42,
+      "archivo": "paginas_originales/pagina_042.webp"
+    },
+    {
+      "pagina": 43,
+      "archivo": "paginas_originales/pagina_043.webp"
+    },
+    {
+      "pagina": 44,
+      "archivo": "paginas_originales/pagina_044.webp"
+    },
+    {
+      "pagina": 45,
+      "archivo": "paginas_originales/pagina_045.webp"
+    },
+    {
+      "pagina": 46,
+      "archivo": "paginas_originales/pagina_046.webp"
+    },
+    {
+      "pagina": 47,
+      "archivo": "paginas_originales/pagina_047.webp"
+    },
+    {
+      "pagina": 48,
+      "archivo": "paginas_originales/pagina_048.webp"
+    },
+    {
+      "pagina": 49,
+      "archivo": "paginas_originales/pagina_049.webp"
+    },
+    {
+      "pagina": 50,
+      "archivo": "paginas_originales/pagina_050.webp"
+    },
+    {
+      "pagina": 51,
+      "archivo": "paginas_originales/pagina_051.webp"
+    },
+    {
+      "pagina": 52,
+      "archivo": "paginas_originales/pagina_052.webp"
+    },
+    {
+      "pagina": 53,
+      "archivo": "paginas_originales/pagina_053.webp"
+    },
+    {
+      "pagina": 54,
+      "archivo": "paginas_originales/pagina_054.webp"
+    },
+    {
+      "pagina": 55,
+      "archivo": "paginas_originales/pagina_055.webp"
+    },
+    {
+      "pagina": 56,
+      "archivo": "paginas_originales/pagina_056.webp"
+    },
+    {
+      "pagina": 57,
+      "archivo": "paginas_originales/pagina_057.webp"
+    },
+    {
+      "pagina": 58,
+      "archivo": "paginas_originales/pagina_058.webp"
+    },
+    {
+      "pagina": 59,
+      "archivo": "paginas_originales/pagina_059.webp"
+    },
+    {
+      "pagina": 60,
+      "archivo": "paginas_originales/pagina_060.webp"
+    },
+    {
+      "pagina": 61,
+      "archivo": "paginas_originales/pagina_061.webp"
+    }
+  ]
+}

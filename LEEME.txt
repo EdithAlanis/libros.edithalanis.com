@@ -1,20 +1,13 @@
-CATALOGO DINAMICO - PORTAL EDITORIAL EDITH ALANIS
+CUENTO PARA MANUEL - ORIGINAL PROTEGIDO
 
-Este cambio NO reemplaza app.js.
+Contiene las 61 páginas originales renderizadas desde el documento recibido.
+No editar, recortar ni reemplazar estas imágenes.
 
-En GitHub:
-1. Reemplaza index.html por el de este ZIP.
-2. Sube catalogo-dinamico.js a la raíz del repositorio.
-3. NO cambies app.js.
-4. NO cambies config.js.
-5. Commit changes.
-6. Espera 1-2 minutos y presiona Ctrl+F5.
+Configuración:
+- páginas 1 a 61: originales protegidas;
+- página 62 en adelante: continuación editable;
+- lectura en línea: gratuita;
+- compra/descarga: $500 MXN.
 
-RESULTADO:
-- La biblioteca ya no depende de una lista fija.
-- Todos los libros con publicado=true en public.portal_libros aparecen automáticamente.
-- Cuentos Cortos aparecerá sin agregarlo manualmente a GitHub.
-- Los libros nuevos creados en el futuro aparecerán automáticamente.
-- Toma de Supabase título, autor, número de páginas, edad, estado, modalidad gratuita/de pago y portada_url.
-- Los libros gratuitos abren todo el contenido.
-- Los libros de pago muestran las primeras 5 páginas mediante portal_leer_muestra().
+Carpeta recomendada en GitHub:
+images/cuento-manuel/original/
