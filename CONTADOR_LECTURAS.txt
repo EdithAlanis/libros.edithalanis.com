@@ -1,0 +1,11 @@
+CONTADOR DE LECTURAS
+
+Esta versión usa las funciones de Supabase ya creadas:
+- public.obtener_lecturas(p_libro_id uuid)
+- public.registrar_lectura(p_libro_id uuid, p_visitante_id uuid)
+
+El catálogo muestra el total debajo del autor y registra una lectura cuando el contenido del libro abre correctamente.
+La misma persona sólo suma una lectura por libro por día, según la función configurada en Supabase.
+
+Archivo principal modificado: catalogo-dinamico.js
+Versión de caché en index.html: 20260824-contador-v2

@@ -29,6 +29,70 @@
       .includes('cuento para manuel');
   }
 
+
+  function getVisitorId() {
+    let id = localStorage.getItem('portal_visitante_id');
+    if (!id) {
+      id = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+      localStorage.setItem('portal_visitante_id', id);
+    }
+    return id;
+  }
+
+  function textoLecturas(total) {
+    const n = Number(total || 0);
+    return n === 1
+      ? 'Este libro ha sido leído 1 vez'
+      : `Este libro ha sido leído ${n.toLocaleString('es-MX')} veces`;
+  }
+
+  function actualizarContadorVisual(libroId, total) {
+    document
+      .querySelectorAll(`[data-reading-count-for="${libroId}"]`)
+      .forEach(el => { el.textContent = textoLecturas(total); });
+  }
+
+  async function obtenerLecturas(libroId) {
+    const c = client();
+    if (!c || !libroId) return 0;
+
+    const { data, error } = await c.rpc('obtener_lecturas', {
+      p_libro_id: libroId
+    });
+
+    if (error) {
+      console.warn('No fue posible consultar lecturas del libro', libroId, error);
+      return 0;
+    }
+
+    return Number(data || 0);
+  }
+
+  async function registrarLectura(libroId) {
+    const c = client();
+    if (!c || !libroId) return null;
+
+    const { data, error } = await c.rpc('registrar_lectura', {
+      p_libro_id: libroId,
+      p_visitante_id: getVisitorId()
+    });
+
+    if (error) {
+      console.warn('No fue posible registrar la lectura del libro', libroId, error);
+      return null;
+    }
+
+    const total = Number(data || 0);
+    actualizarContadorVisual(libroId, total);
+    return total;
+  }
+
   function ensureReaderModal() {
     if (document.getElementById('catalogReaderModal')) return;
 
@@ -408,6 +472,10 @@
       return;
     }
 
+    // Cuenta una lectura real sólo cuando el contenido pudo abrirse.
+    // Supabase evita duplicar la lectura del mismo visitante durante el mismo día.
+    await registrarLectura(libroId);
+
     document.getElementById(
       'catalogReaderTitle'
     ).textContent = titulo;
@@ -661,6 +729,18 @@
                 </b>
               </p>
 
+              <p
+                data-reading-count-for="${libro.id}"
+                style="
+                  margin:0 0 12px;
+                  color:#8a6a2c;
+                  font-size:13px;
+                  font-weight:700;
+                "
+              >
+                Cargando lecturas…
+              </p>
+
               <div class="meta">
 
                 <span>
@@ -743,12 +823,22 @@
         )
         .onclick = abrir;
     });
+
+    // Carga los contadores después de pintar las tarjetas para no retrasar el catálogo.
+    Promise.all(
+      libros.map(async libro => {
+        const total = await obtenerLecturas(libro.id);
+        actualizarContadorVisual(libro.id, total);
+      })
+    ).catch(err => console.warn('No fue posible cargar contadores de lectura', err));
   }
 
   window.PortalCatalogo = {
     cargarCatalogo,
     leerLibro,
-    cerrarLectura
+    cerrarLectura,
+    obtenerLecturas,
+    registrarLectura
   };
 
   document.addEventListener(
