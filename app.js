@@ -1,7 +1,7 @@
 (function () {
   const cfg = window.PORTAL_CONFIG || {};
   let sb = null;
-  let desiredRole = 'administrador';
+  let desiredRole = 'acceso';
   let perfilActual = null;
   let credenciales = null;
   let libroActual = null;
@@ -21,7 +21,7 @@
   }
 
   function normalizeRole(role) {
-    return { admin:'administrador', author:'autor', reader:'lector' }[role] || role;
+    return { admin:'administrador', author:'autor', reader:'lector', acceso:'acceso' }[role] || role;
   }
 
   function hidePasswordField() {
@@ -49,7 +49,8 @@
     if (title) {
       title.textContent =
         desiredRole === 'administrador' ? 'Acceso administrativo' :
-        desiredRole === 'autor' ? 'Acceso de autor' : 'Acceso de lector';
+        desiredRole === 'autor' ? 'Acceso de autor' :
+        desiredRole === 'lector' ? 'Acceso de lector' : 'Acceso al portal';
     }
 
     if (message) {
@@ -108,25 +109,30 @@
       return;
     }
 
-    const puedeEntrar =
-      perfil.tipo_usuario === desiredRole ||
-      perfil.tipo_usuario === 'administrador';
+    // Enrutamiento automático por el rol real de la cuenta.
+    // El acceso general detecta si la persona es administrador, autor o lector.
+    let modoFinal = desiredRole;
 
-    if (!puedeEntrar) {
-      alert(
-        'Esta cuenta corresponde a "' +
-        perfil.tipo_usuario +
-        '" y no tiene permiso para entrar como "' +
-        desiredRole +
-        '".'
-      );
+    if (desiredRole === 'acceso') {
+      modoFinal = perfil.tipo_usuario;
+    } else if (perfil.tipo_usuario === 'administrador') {
+      // El administrador puede usar cualquiera de los tres paneles.
+      modoFinal = desiredRole;
+    } else if (perfil.tipo_usuario === desiredRole) {
+      modoFinal = desiredRole;
+    } else if (perfil.tipo_usuario === 'autor') {
+      modoFinal = 'autor';
+    } else if (perfil.tipo_usuario === 'lector') {
+      modoFinal = 'lector';
+    } else {
+      alert('El tipo de cuenta no tiene un panel habilitado.');
       return;
     }
 
     perfilActual = perfil;
     credenciales = { email, pin };
     closeLogin();
-    renderPanel(perfil, desiredRole);
+    renderPanel(perfil, modoFinal);
   }
 
   function logout() {
@@ -811,7 +817,7 @@
     registrarVisita();
 
     const top = get('topSecureLogin');
-    if (top) top.onclick = () => showLogin('administrador');
+    if (top) top.onclick = () => showLogin('acceso');
 
     document.querySelectorAll('button').forEach(function (btn) {
       const t = btn.textContent.trim();
