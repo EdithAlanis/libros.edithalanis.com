@@ -8,6 +8,15 @@
   let paginaActual = 1;
   let imagenPaginaData = null;
 
+  // Lector continuo de libros (Web Speech API).
+  let lecturaChunks = [];
+  let lecturaIndice = 0;
+  let lecturaPausada = false;
+  let lecturaActiva = false;
+  let lecturaVelocidad = 1;
+  let lecturaLibroClave = '';
+  let lecturaPaginaMarcada = null;
+
   const get = (id) => document.getElementById(id);
 
   function configured() {
@@ -261,10 +270,241 @@
           <button class="close" onclick="PortalBooks.cerrarLibro()">×</button>
           <h2 id="portalBookTitle">Libro</h2>
           <p class="legal" id="portalBookNotice"></p>
+          <div id="portalAudioReader" style="position:sticky;top:0;z-index:4;background:#fffdf8;border:1px solid #d6c39b;border-radius:10px;padding:14px;margin:14px 0 18px;box-shadow:0 4px 14px rgba(0,0,0,.08)">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <button class="btn navy" id="audioPlayBtn" onclick="PortalBooks.leerLibro()">🔊 Escuchar libro</button>
+              <button class="btn outline" id="audioPauseBtn" onclick="PortalBooks.pausarLectura()">⏸ Pausar</button>
+              <button class="btn outline" id="audioResumeBtn" onclick="PortalBooks.continuarLectura()">▶ Continuar</button>
+              <button class="btn outline" id="audioStopBtn" onclick="PortalBooks.detenerLectura()">⏹ Detener</button>
+              <label for="audioRate" style="font-size:14px;margin-left:auto">Velocidad</label>
+              <select id="audioRate" onchange="PortalBooks.cambiarVelocidad(this.value)" style="padding:9px;border:1px solid #d6d2c8;border-radius:7px;background:white">
+                <option value="0.8">0.8×</option>
+                <option value="1" selected>1×</option>
+                <option value="1.2">1.2×</option>
+                <option value="1.5">1.5×</option>
+              </select>
+            </div>
+            <div id="audioReaderStatus" role="status" aria-live="polite" style="font-size:13px;color:#6d7480;margin-top:9px">Lectura por voz lista.</div>
+          </div>
           <div id="portalBookPages"></div>
         </div>
       </div>
     `);
+  }
+
+  function lectorDisponible() {
+    return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  }
+
+  function actualizarEstadoLectura(texto) {
+    const el = get('audioReaderStatus');
+    if (el) el.textContent = texto;
+  }
+
+  function claveProgresoLectura() {
+    return 'portal_audio_progreso_' + lecturaLibroClave;
+  }
+
+  function guardarProgresoLectura() {
+    if (!lecturaLibroClave || !lecturaChunks.length) return;
+    try { localStorage.setItem(claveProgresoLectura(), String(lecturaIndice)); } catch (_) {}
+  }
+
+  function cargarProgresoLectura() {
+    if (!lecturaLibroClave || !lecturaChunks.length) return 0;
+    try {
+      const n = Number(localStorage.getItem(claveProgresoLectura()) || 0);
+      return Number.isInteger(n) && n >= 0 && n < lecturaChunks.length ? n : 0;
+    } catch (_) { return 0; }
+  }
+
+  function dividirParaVoz(texto, max = 220) {
+    const limpio = String(texto || '').replace(/\s+/g, ' ').trim();
+    if (!limpio) return [];
+    const oraciones = limpio.match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g) || [limpio];
+    const salida = [];
+    let actual = '';
+    for (const oracion of oraciones) {
+      const parte = oracion.trim();
+      if (!parte) continue;
+      if ((actual + ' ' + parte).trim().length <= max) {
+        actual = (actual + ' ' + parte).trim();
+      } else {
+        if (actual) salida.push(actual);
+        if (parte.length <= max) {
+          actual = parte;
+        } else {
+          const palabras = parte.split(/\s+/);
+          actual = '';
+          for (const palabra of palabras) {
+            if ((actual + ' ' + palabra).trim().length > max) {
+              if (actual) salida.push(actual);
+              actual = palabra;
+            } else {
+              actual = (actual + ' ' + palabra).trim();
+            }
+          }
+        }
+      }
+    }
+    if (actual) salida.push(actual);
+    return salida;
+  }
+
+  function prepararLectura(paginas) {
+    lecturaChunks = [];
+    lecturaActiva = false;
+    lecturaPausada = false;
+    lecturaPaginaMarcada = null;
+
+    (paginas || []).forEach(p => {
+      const partes = [];
+      if (p.titulo) partes.push(...dividirParaVoz(p.titulo));
+      partes.push(...dividirParaVoz(p.contenido || ''));
+      partes.forEach(texto => lecturaChunks.push({ texto, pagina: p.numero }));
+    });
+
+    lecturaLibroClave = encodeURIComponent((get('portalBookTitle')?.textContent || 'libro').trim().toLowerCase());
+    lecturaIndice = cargarProgresoLectura();
+
+    if (!lectorDisponible()) {
+      actualizarEstadoLectura('Este navegador no ofrece lectura por voz. Prueba con Chrome, Edge o Safari actualizado.');
+      return;
+    }
+
+    if (!lecturaChunks.length) {
+      actualizarEstadoLectura('Este libro todavía no tiene texto disponible para escuchar.');
+    } else if (lecturaIndice > 0) {
+      const pag = lecturaChunks[lecturaIndice]?.pagina || '';
+      actualizarEstadoLectura('Listo para continuar desde la página ' + pag + '.');
+    } else {
+      actualizarEstadoLectura('Lectura por voz lista. Presiona “Escuchar libro”.');
+    }
+  }
+
+  function marcarPaginaLectura(numero) {
+    if (lecturaPaginaMarcada === numero) return;
+    document.querySelectorAll('#portalBookPages article[data-page-number]').forEach(el => {
+      el.style.outline = '';
+      el.style.boxShadow = '';
+    });
+    const actual = document.querySelector('#portalBookPages article[data-page-number="' + numero + '"]');
+    if (actual) {
+      actual.style.outline = '3px solid #d6c39b';
+      actual.style.boxShadow = '0 0 0 4px rgba(214,195,155,.18)';
+    }
+    lecturaPaginaMarcada = numero;
+  }
+
+  function elegirVozEspanol() {
+    const voces = window.speechSynthesis.getVoices() || [];
+    return voces.find(v => /^es-MX$/i.test(v.lang)) ||
+      voces.find(v => /^es(-|_)/i.test(v.lang)) || null;
+  }
+
+  function hablarSiguiente() {
+    if (!lecturaActiva || lecturaPausada) return;
+    if (lecturaIndice >= lecturaChunks.length) {
+      lecturaActiva = false;
+      lecturaPausada = false;
+      lecturaIndice = 0;
+      try { localStorage.removeItem(claveProgresoLectura()); } catch (_) {}
+      actualizarEstadoLectura('Lectura terminada.');
+      marcarPaginaLectura(null);
+      return;
+    }
+
+    const item = lecturaChunks[lecturaIndice];
+    marcarPaginaLectura(item.pagina);
+    actualizarEstadoLectura('Leyendo página ' + item.pagina + '…');
+
+    const utterance = new SpeechSynthesisUtterance(item.texto);
+    utterance.lang = 'es-MX';
+    utterance.rate = lecturaVelocidad;
+    const voz = elegirVozEspanol();
+    if (voz) utterance.voice = voz;
+
+    utterance.onend = () => {
+      if (!lecturaActiva || lecturaPausada) return;
+      lecturaIndice += 1;
+      guardarProgresoLectura();
+      setTimeout(hablarSiguiente, 60);
+    };
+
+    utterance.onerror = (e) => {
+      if (e.error === 'canceled' || e.error === 'interrupted') return;
+      lecturaActiva = false;
+      actualizarEstadoLectura('La lectura se interrumpió. Presiona “Continuar” para reanudar.');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function leerLibro() {
+    if (!lectorDisponible()) {
+      alert('Este navegador no ofrece lectura por voz. Prueba con Chrome, Edge o Safari actualizado.');
+      return;
+    }
+    if (!lecturaChunks.length) {
+      actualizarEstadoLectura('Este libro todavía no tiene texto disponible para escuchar.');
+      return;
+    }
+    if (lecturaPausada) {
+      continuarLectura();
+      return;
+    }
+    if (lecturaActiva && window.speechSynthesis.speaking) return;
+    window.speechSynthesis.cancel();
+    lecturaActiva = true;
+    lecturaPausada = false;
+    hablarSiguiente();
+  }
+
+  function pausarLectura() {
+    if (!lectorDisponible() || !lecturaActiva) return;
+    window.speechSynthesis.pause();
+    lecturaPausada = true;
+    guardarProgresoLectura();
+    const pag = lecturaChunks[lecturaIndice]?.pagina || '';
+    actualizarEstadoLectura('Lectura pausada' + (pag ? ' en la página ' + pag : '') + '.');
+  }
+
+  function continuarLectura() {
+    if (!lectorDisponible() || !lecturaChunks.length) return;
+    if (lecturaPausada && window.speechSynthesis.paused) {
+      lecturaPausada = false;
+      lecturaActiva = true;
+      window.speechSynthesis.resume();
+      const pag = lecturaChunks[lecturaIndice]?.pagina || '';
+      actualizarEstadoLectura('Continuando' + (pag ? ' desde la página ' + pag : '') + '…');
+      return;
+    }
+    lecturaPausada = false;
+    lecturaActiva = true;
+    window.speechSynthesis.cancel();
+    setTimeout(hablarSiguiente, 80);
+  }
+
+  function detenerLectura() {
+    if (!lectorDisponible()) return;
+    guardarProgresoLectura();
+    window.speechSynthesis.cancel();
+    lecturaActiva = false;
+    lecturaPausada = false;
+    const pag = lecturaChunks[lecturaIndice]?.pagina || '';
+    actualizarEstadoLectura('Lectura detenida' + (pag ? '. Podrás continuar desde la página ' + pag : '') + '.');
+  }
+
+  function cambiarVelocidad(valor) {
+    const nueva = Number(valor);
+    if (!Number.isFinite(nueva) || nueva <= 0) return;
+    lecturaVelocidad = nueva;
+    if (lecturaActiva && !lecturaPausada && lectorDisponible()) {
+      window.speechSynthesis.cancel();
+      setTimeout(hablarSiguiente, 80);
+    } else {
+      actualizarEstadoLectura('Velocidad seleccionada: ' + nueva + '×.');
+    }
   }
 
   function renderPaginasLectura(paginas) {
@@ -287,7 +527,7 @@
       const texto = `<div style="white-space:pre-wrap;line-height:1.8;font-family:Georgia,serif;font-size:18px;color:#29251f">${escapeHtml(p.contenido || '') || '<em>Página en preparación.</em>'}</div>`;
 
       return `
-        <article style="background:#fffdf8;border:1px solid #e5dfd2;border-radius:10px;padding:28px;margin:18px 0;min-height:320px">
+        <article data-page-number="${p.numero}" style="background:#fffdf8;border:1px solid #e5dfd2;border-radius:10px;padding:28px;margin:18px 0;min-height:320px;transition:outline .2s,box-shadow .2s">
           <div style="font-size:12px;letter-spacing:.12em;color:#9b7a37;text-transform:uppercase;margin-bottom:10px">Página ${p.numero}</div>
           ${p.titulo ? `<h3 style="font-family:Georgia,serif;color:#0b1b36">${escapeHtml(p.titulo)}</h3>` : ''}
           ${p.imagen_posicion === 'arriba' ? imagen : ''}
@@ -295,6 +535,7 @@
           ${p.imagen_posicion === 'abajo' ? imagen : ''}
         </article>`;
     }).join('');
+    prepararLectura(paginas);
   }
 
   async function abrirLibroPublicoPorTitulo(titulo) {
@@ -341,6 +582,7 @@
   }
 
   function cerrarLibro() {
+    if (lectorDisponible() && (lecturaActiva || lecturaPausada)) detenerLectura();
     get('portalBookModal')?.classList.remove('open');
     document.body.style.overflow = '';
   }
@@ -797,6 +1039,11 @@
   window.PortalBooks = {
     abrirLibroPublicoPorTitulo,
     cerrarLibro,
+    leerLibro,
+    pausarLectura,
+    continuarLectura,
+    detenerLectura,
+    cambiarVelocidad,
     abrirEditor,
     cerrarEditor,
     cargarPagina,
