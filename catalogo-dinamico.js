@@ -121,6 +121,99 @@
     `);
   }
 
+  // Lector de voz continuo para cualquier libro abierto desde el catálogo.
+  let audioPaginas = [];
+  let audioIndice = 0;
+  let audioActivo = false;
+  let audioPausado = false;
+  let audioVelocidad = 1;
+
+  function limpiarTextoAudio(texto) {
+    return String(texto || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function prepararAudio(paginas) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    audioActivo = false;
+    audioPausado = false;
+    audioIndice = 0;
+    audioPaginas = (paginas || [])
+      .sort((a,b) => Number(a.numero || 0) - Number(b.numero || 0))
+      .map(p => [p.titulo, p.contenido].map(limpiarTextoAudio).filter(Boolean).join('. '))
+      .filter(Boolean);
+  }
+
+  function vozEspanol() {
+    const voces = window.speechSynthesis.getVoices();
+    return voces.find(v => /^es-MX/i.test(v.lang)) ||
+           voces.find(v => /^es/i.test(v.lang)) || null;
+  }
+
+  function hablarSiguiente() {
+    if (!audioActivo || audioPausado) return;
+    if (audioIndice >= audioPaginas.length) {
+      audioActivo = false;
+      audioPausado = false;
+      actualizarEstadoAudio('Lectura terminada');
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(audioPaginas[audioIndice]);
+    u.lang = 'es-MX';
+    u.rate = audioVelocidad;
+    const v = vozEspanol(); if (v) u.voice = v;
+    u.onend = () => { if (audioActivo && !audioPausado) { audioIndice++; hablarSiguiente(); } };
+    u.onerror = () => { if (audioActivo && !audioPausado) { audioIndice++; hablarSiguiente(); } };
+    actualizarEstadoAudio(`Escuchando · página ${audioIndice + 1} de ${audioPaginas.length}`);
+    window.speechSynthesis.speak(u);
+  }
+
+  function iniciarAudio() {
+    if (!('speechSynthesis' in window)) { alert('Este navegador no dispone de lectura por voz.'); return; }
+    if (!audioPaginas.length) { alert('No hay texto disponible para escuchar.'); return; }
+    window.speechSynthesis.cancel();
+    audioIndice = 0; audioActivo = true; audioPausado = false;
+    hablarSiguiente();
+  }
+
+  function pausarAudio() {
+    if (!audioActivo) return;
+    window.speechSynthesis.pause(); audioPausado = true; actualizarEstadoAudio('Lectura pausada');
+  }
+
+  function continuarAudio() {
+    if (!audioActivo) { iniciarAudio(); return; }
+    window.speechSynthesis.resume(); audioPausado = false;
+    actualizarEstadoAudio(`Escuchando · página ${audioIndice + 1} de ${audioPaginas.length}`);
+  }
+
+  function detenerAudio() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    audioActivo = false; audioPausado = false; audioIndice = 0; actualizarEstadoAudio('Listo para escuchar');
+  }
+
+  function cambiarVelocidadAudio(valor) {
+    audioVelocidad = Number(valor) || 1;
+    if (audioActivo) { window.speechSynthesis.cancel(); audioPausado = false; hablarSiguiente(); }
+  }
+
+  function actualizarEstadoAudio(texto) {
+    const el = document.getElementById('catalogAudioStatus'); if (el) el.textContent = texto;
+  }
+
+  function controlesAudio() {
+    if (!('speechSynthesis' in window)) return '<p class="legal">La lectura por voz no está disponible en este navegador.</p>';
+    return `<div id="catalogAudioControls" style="position:sticky;top:0;z-index:5;background:#f7f2e8;border:1px solid #d6c39b;border-radius:10px;padding:14px;margin:12px 0 20px;box-shadow:0 3px 12px rgba(0,0,0,.08)">
+      <div style="font-weight:700;color:#0b1b36;margin-bottom:9px">🔊 Audiolibro · lectura continua</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn navy" onclick="PortalCatalogo.iniciarAudio()">🔊 Escuchar libro</button>
+        <button class="btn outline" onclick="PortalCatalogo.pausarAudio()">⏸ Pausar</button>
+        <button class="btn outline" onclick="PortalCatalogo.continuarAudio()">▶ Continuar</button>
+        <button class="btn outline" onclick="PortalCatalogo.detenerAudio()">⏹ Detener</button>
+        <label style="font-size:13px;color:#465064">Velocidad <select onchange="PortalCatalogo.cambiarVelocidadAudio(this.value)" style="padding:7px;border-radius:6px"><option value="0.8">0.8×</option><option value="1" selected>1×</option><option value="1.2">1.2×</option><option value="1.5">1.5×</option></select></label>
+      </div><div id="catalogAudioStatus" style="font-size:12px;color:#6d7480;margin-top:8px">Listo para escuchar</div></div>`;
+  }
+
   function renderPages(paginas) {
     const cont = document.getElementById('catalogReaderPages');
 
@@ -130,7 +223,8 @@
       return;
     }
 
-    cont.innerHTML = paginas.map(p => {
+    prepararAudio(paginas);
+    cont.innerHTML = controlesAudio() + paginas.map(p => {
 
       const imagen = p.imagen_data ? `
         <figure style="
@@ -225,6 +319,7 @@
   }
 
   function renderCuentoManuel(paginasBD) {
+    prepararAudio(paginasBD);
     const cont = document.getElementById('catalogReaderPages');
 
     if (!cont) return;
@@ -541,6 +636,7 @@
   }
 
   function cerrarLectura() {
+    detenerAudio();
     document
       .getElementById('catalogReaderModal')
       ?.classList
@@ -838,7 +934,8 @@
     leerLibro,
     cerrarLectura,
     obtenerLecturas,
-    registrarLectura
+    registrarLectura,
+    iniciarAudio, pausarAudio, continuarAudio, detenerAudio, cambiarVelocidadAudio
   };
 
   document.addEventListener(
