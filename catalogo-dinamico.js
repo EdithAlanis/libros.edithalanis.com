@@ -29,6 +29,17 @@
       .includes('cuento para manuel');
   }
 
+  function esEdithAmigoEspecial(titulo) {
+    const t = String(titulo || '').trim().toLowerCase();
+    return t.includes('edith y su amigo especial') ||
+           t.includes('nicolás y su amigo especial') ||
+           t.includes('nicolas y su amigo especial');
+  }
+
+  function tituloPublico(titulo) {
+    return esEdithAmigoEspecial(titulo) ? 'Edith y su amigo especial' : String(titulo || '');
+  }
+
 
   function getVisitorId() {
     let id = localStorage.getItem('portal_visitante_id');
@@ -516,6 +527,17 @@
 
     ensureReaderModal();
 
+    if (esEdithAmigoEspecial(titulo)) {
+      document.getElementById('catalogReaderTitle').textContent = 'Edith y su amigo especial';
+      document.getElementById('catalogReaderNotice').textContent =
+        'EXCLUSIVO · EN CONSTRUCCIÓN · El contenido de esta obra no está disponible para lectura y no tiene muestra de 5 páginas.';
+      document.getElementById('catalogReaderPages').innerHTML =
+        '<div style="padding:24px;border:1px solid #d6c39b;border-radius:10px;background:#fffaf0"><b>Obra de acceso exclusivo.</b><p>Actualmente se encuentra en construcción. Nadie puede leer su contenido ni sus primeras páginas.</p></div>';
+      document.getElementById('catalogReaderModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+
     let data = [];
     let error = null;
 
@@ -690,7 +712,7 @@
 
           <img
             src="${esc(libro.portada_url)}"
-            alt="Portada de ${esc(libro.titulo)}"
+            alt="Portada de ${esc(tituloPublico(libro.titulo))}"
             style="
               width:100%;
               height:100%;
@@ -716,7 +738,7 @@
 
         <small>${label}</small>
 
-        <h3>${esc(libro.titulo)}</h3>
+        <h3>${esc(tituloPublico(libro.titulo))}</h3>
 
         <span class="pseud">
           por ${esc(libro.autor_nombre || 'Autor')}
@@ -724,6 +746,33 @@
 
       </div>
     `;
+  }
+
+
+  async function cargarComentariosPublicos(libroId, box) {
+    const c=client(); if(!c || !box) return;
+    const cont=box.querySelector('.comentarios-publicados');
+    const {data,error}=await c.rpc('portal_comentarios_publicados',{p_libro_id:libroId});
+    if(error){cont.innerHTML='<span class="legal">Comentarios disponibles próximamente.</span>';return;}
+    cont.innerHTML=(data||[]).length ? data.map(x=>`
+      <div style="background:#faf8f2;border-radius:8px;padding:10px;margin:7px 0">
+        <b>${esc(x.nombre)}</b>
+        <span class="legal"> · ${new Date(x.creado).toLocaleDateString('es-MX')}</span>
+        <p style="margin:5px 0">${esc(x.comentario)}</p>
+      </div>`).join('') : '<span class="legal">Aún no hay comentarios publicados.</span>';
+  }
+
+  async function enviarComentario(libroId, box) {
+    const c=client(); if(!c) return;
+    const nombre=box.querySelector('.comentario-nombre').value.trim();
+    const comentario=box.querySelector('.comentario-texto').value.trim();
+    const estado=box.querySelector('.comentario-estado');
+    if(nombre.length<2 || comentario.length<3){estado.textContent='Escribe tu nombre o seudónimo y un comentario.';return;}
+    estado.textContent='Enviando…';
+    const {error}=await c.rpc('portal_enviar_comentario',{p_libro_id:libroId,p_nombre:nombre,p_comentario:comentario});
+    if(error){estado.textContent='No fue posible enviar el comentario.';return;}
+    box.querySelector('.comentario-texto').value='';
+    estado.textContent='Comentario enviado. Quedará visible cuando la administración lo apruebe.';
   }
 
   async function cargarCatalogo() {
@@ -772,8 +821,10 @@
           ? ` · Edad recomendada: ${esc(libro.edad_recomendada)}`
           : '';
 
+      const exclusivo = esEdithAmigoEspecial(libro.titulo);
+
       const estado =
-        libro.terminado
+        exclusivo ? 'EXCLUSIVO · EN CONSTRUCCIÓN' : libro.terminado
           ? 'Libro terminado'
           : (
               libro.estado === 'terminado'
@@ -782,9 +833,11 @@
             );
 
       const lectura =
-        libro.lectura_gratuita
-          ? 'Lectura completa gratuita'
-          : '5 páginas gratis';
+        exclusivo
+          ? 'Sin acceso de lectura'
+          : (libro.lectura_gratuita
+              ? 'Lectura completa gratuita'
+              : '5 páginas gratis');
 
       const download =
         libro.precio_descarga
@@ -792,9 +845,11 @@
           : '';
 
       const readLabel =
-        libro.lectura_gratuita
-          ? 'Leer gratis'
-          : 'Leer 5 páginas gratis';
+        exclusivo
+          ? 'Ver estado de la obra'
+          : (libro.lectura_gratuita
+              ? 'Leer gratis'
+              : 'Leer 5 páginas gratis');
 
       grid.insertAdjacentHTML(
         'beforeend',
@@ -813,7 +868,7 @@
                 color:var(--navy);
                 margin:0 0 8px;
               ">
-                ${esc(libro.titulo)}
+                ${esc(tituloPublico(libro.titulo))}
               </h3>
 
               <p style="
@@ -872,6 +927,15 @@
 
               </div>
 
+              <div class="comentarios-libro" data-comments-for="${libro.id}" style="margin-top:18px;padding-top:16px;border-top:1px solid #e5dfd2">
+                <h4 style="margin:0 0 8px;color:#0b1b36">Comentarios de lectores</h4>
+                <div class="comentarios-publicados" style="margin-bottom:12px"><span class="legal">Cargando comentarios…</span></div>
+                <input class="comentario-nombre" maxlength="80" placeholder="Nombre o seudónimo" style="width:100%;padding:9px;margin:5px 0;border:1px solid #d9d2c5;border-radius:7px">
+                <textarea class="comentario-texto" maxlength="1200" placeholder="Escribe tu comentario..." style="width:100%;min-height:90px;padding:9px;margin:5px 0;border:1px solid #d9d2c5;border-radius:7px"></textarea>
+                <button class="btn outline js-enviar-comentario">Enviar comentario</button>
+                <p class="legal comentario-estado" style="margin-top:7px">Los comentarios se publican después de ser revisados por la administración.</p>
+              </div>
+
               <div class="card-actions">
 
                 <button
@@ -918,6 +982,11 @@
           '.js-ver-libro'
         )
         .onclick = abrir;
+
+      const commentsBox = card.querySelector('[data-comments-for]');
+      cargarComentariosPublicos(libro.id, commentsBox);
+      card.querySelector('.js-enviar-comentario').onclick = () =>
+        enviarComentario(libro.id, commentsBox);
     });
 
     // Carga los contadores después de pintar las tarjetas para no retrasar el catálogo.

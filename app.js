@@ -190,6 +190,11 @@
               <button class="btn navy" onclick="PortalAnalytics.mostrar()">Ver visitantes</button>
             </div></article>
             <article class="book-card"><div class="card-body">
+              <h3>Comentarios de lectores</h3>
+              <p>Revisa comentarios pendientes, publica los que autorices o elimina los que no desees conservar.</p>
+              <button class="btn gold" onclick="PortalComments.mostrar()">Administrar comentarios</button>
+            </div></article>
+            <article class="book-card"><div class="card-body">
               <h3>Entrar como autor</h3>
               <p>Usa la misma cuenta para escribir, editar y publicar tus libros.</p>
               <button class="btn navy" onclick="PortalAuth.cambiarModo('autor')">Panel de autor</button>
@@ -1015,6 +1020,88 @@
     `;
   }
 
+
+  async function mostrarComentariosAdmin(filtro='pendiente') {
+    if (!perfilActual || perfilActual.tipo_usuario !== 'administrador' || !credenciales) {
+      alert('Primero inicia sesión como administrador.');
+      return;
+    }
+
+    const { data, error } = await client().rpc('portal_admin_comentarios', {
+      p_email: credenciales.email,
+      p_nip: credenciales.pin,
+      p_estado: filtro
+    });
+
+    if (error) {
+      alert('No fue posible cargar los comentarios: ' + error.message);
+      return;
+    }
+
+    const panel = get('panel-usuario');
+    const content = get('panelContent');
+    if (!panel || !content) return;
+    panel.style.display='block';
+    get('panelTitle').textContent='Comentarios de lectores';
+    get('panelSubtitle').textContent='Moderación administrativa';
+
+    const rows = data || [];
+    content.innerHTML = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+        <button class="btn ${filtro==='pendiente'?'navy':'outline'}" onclick="PortalComments.mostrar('pendiente')">Pendientes</button>
+        <button class="btn ${filtro==='publicado'?'navy':'outline'}" onclick="PortalComments.mostrar('publicado')">Publicados</button>
+        <button class="btn ${filtro==='todos'?'navy':'outline'}" onclick="PortalComments.mostrar('todos')">Todos</button>
+      </div>
+      ${rows.length ? rows.map(r => `
+        <article class="book-card" style="margin-bottom:14px">
+          <div class="card-body">
+            <div class="meta"><span>${escapeHtml(r.libro_titulo)}</span><span>${new Date(r.creado).toLocaleString('es-MX')}</span></div>
+            <h3>${escapeHtml(r.nombre)}</h3>
+            <p>${escapeHtml(r.comentario)}</p>
+            <p class="legal">Estado: <b>${escapeHtml(r.estado)}</b></p>
+            <div class="card-actions">
+              ${r.estado!=='publicado' ? `<button class="btn navy" onclick="PortalComments.publicar('${r.id}')">Publicar</button>` : `<button class="btn outline" onclick="PortalComments.ocultar('${r.id}')">Retirar de publicación</button>`}
+              <button class="btn outline" onclick="PortalComments.eliminar('${r.id}')">Eliminar</button>
+            </div>
+          </div>
+        </article>`).join('') : '<p>No hay comentarios en esta categoría.</p>'}
+      <button class="btn outline" onclick="PortalAuth.cambiarModo('administrador')">Volver al panel administrativo</button>
+    `;
+  }
+
+  async function publicarComentario(id) {
+    if (!confirm('¿Publicar este comentario?')) return;
+    const { error } = await client().rpc('portal_admin_publicar_comentario', {
+      p_email: credenciales.email, p_nip: credenciales.pin, p_id:id
+    });
+    if (error) return alert('No se pudo publicar: '+error.message);
+    mostrarComentariosAdmin('pendiente');
+  }
+
+  async function ocultarComentario(id) {
+    if (!confirm('¿Retirar este comentario de la vista pública?')) return;
+    const { error } = await client().rpc('portal_admin_ocultar_comentario', {
+      p_email: credenciales.email, p_nip: credenciales.pin, p_id:id
+    });
+    if (error) return alert('No se pudo retirar: '+error.message);
+    mostrarComentariosAdmin('publicado');
+  }
+
+  async function eliminarComentario(id) {
+    if (!confirm('¿Eliminar definitivamente este comentario?')) return;
+    const { error } = await client().rpc('portal_admin_eliminar_comentario', {
+      p_email: credenciales.email, p_nip: credenciales.pin, p_id:id
+    });
+    if (error) return alert('No se pudo eliminar: '+error.message);
+    mostrarComentariosAdmin('todos');
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
   function conectarTarjetasCatalogo() {
     document.querySelectorAll('#bookGrid .book-card').forEach(card => {
       const titulo = card.querySelector('h3')?.textContent.trim();
@@ -1058,6 +1145,12 @@
   };
 
   window.PortalAnalytics = { mostrar: mostrarAnalitica };
+  window.PortalComments = {
+    mostrar: mostrarComentariosAdmin,
+    publicar: publicarComentario,
+    ocultar: ocultarComentario,
+    eliminar: eliminarComentario
+  };
 
   document.addEventListener('DOMContentLoaded', function () {
     hidePasswordField();
