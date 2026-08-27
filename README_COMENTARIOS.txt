@@ -11,7 +11,7 @@ PORTAL EDITORIAL — COMENTARIOS MODERADOS
    - Retirar un comentario ya publicado.
    - Eliminar definitivamente.
 
-La obra “Edith y su amigo especial” queda:
+La obra “La tecnología en tiempos de postpandemia” queda:
 - En construcción.
 - Sin lectura pública.
 - Sin muestra de 5 páginas.

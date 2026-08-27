@@ -46,10 +46,10 @@ begin
        'update %I.%I set %I=$1 where lower(%I) in ($2,$3,$4)',
        r.table_schema,r.table_name,r.column_name,r.column_name
      )
-     using 'Edith y su amigo especial',
-           lower('Para Nicolás y su amigo especial'),
-           lower('Nicolás y su amigo especial'),
-           lower('Nicolas y su amigo especial');
+     using 'La tecnología en tiempos de postpandemia',
+           lower('La tecnología en tiempos de postpandemia'),
+           lower('La tecnología en tiempos de postpandemia'),
+           lower('La tecnología en tiempos de postpandemia');
    exception when others then
      null;
    end;

@@ -191,21 +191,21 @@ grant execute on function public.portal_admin_publicar_comentario(text,text,uuid
 grant execute on function public.portal_admin_ocultar_comentario(text,text,uuid) to anon,authenticated;
 grant execute on function public.portal_admin_eliminar_comentario(text,text,uuid) to anon,authenticated;
 
--- 8. Dejar "Edith y su amigo especial" como obra exclusiva y en construcción
+-- 8. Dejar "La tecnología en tiempos de postpandemia" como obra exclusiva y en construcción
 update public.portal_libros
-set titulo='Edith y su amigo especial',
+set titulo='La tecnología en tiempos de postpandemia',
     estado='construccion',
     lectura_gratuita=false,
     updated_at=now()
 where lower(titulo) in (
-  lower('Para Nicolás y su amigo especial'),
-  lower('Nicolás y su amigo especial'),
-  lower('Nicolas y su amigo especial'),
-  lower('Edith y su amigo especial')
+  lower('La tecnología en tiempos de postpandemia'),
+  lower('La tecnología en tiempos de postpandemia'),
+  lower('La tecnología en tiempos de postpandemia'),
+  lower('La tecnología en tiempos de postpandemia')
 );
 
 -- 9. Comprobación
 select
   (select count(*) from public.portal_comentarios) as comentarios,
   (select count(*) from public.portal_libros
-   where lower(titulo)=lower('Edith y su amigo especial')) as libro_exclusivo;
+   where lower(titulo)=lower('La tecnología en tiempos de postpandemia')) as libro_exclusivo;

@@ -37,7 +37,7 @@
   }
 
   function tituloPublico(titulo) {
-    return esEdithAmigoEspecial(titulo) ? 'Edith y su amigo especial' : String(titulo || '');
+    return esEdithAmigoEspecial(titulo) ? 'La tecnología en tiempos de postpandemia' : String(titulo || '');
   }
 
 
@@ -528,7 +528,7 @@
     ensureReaderModal();
 
     if (esEdithAmigoEspecial(titulo)) {
-      document.getElementById('catalogReaderTitle').textContent = 'Edith y su amigo especial';
+      document.getElementById('catalogReaderTitle').textContent = 'La tecnología en tiempos de postpandemia';
       document.getElementById('catalogReaderNotice').textContent =
         'EXCLUSIVO · EN CONSTRUCCIÓN · El contenido de esta obra no está disponible para lectura y no tiene muestra de 5 páginas.';
       document.getElementById('catalogReaderPages').innerHTML =
