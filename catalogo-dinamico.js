@@ -37,7 +37,10 @@
   }
 
   function tituloPublico(titulo) {
-    return esEdithAmigoEspecial(titulo) ? 'La tecnología en tiempos de postpandemia' : String(titulo || '');
+    const t = String(titulo || '');
+    if (esEdithAmigoEspecial(t)) return 'La tecnología en tiempos de postpandemia';
+    if (t.trim().toLowerCase() === 'cuentos cortos') return 'Relatos Cortos';
+    return t;
   }
 
 
@@ -330,7 +333,11 @@
   }
 
   function renderCuentoManuel(paginasBD) {
-    prepararAudio(paginasBD);
+    const textoOriginal = Array.isArray(window.CUENTO_MANUEL_TEXTO)
+      ? window.CUENTO_MANUEL_TEXTO
+      : [];
+    const continuacion = (paginasBD || []).filter(p => Number(p.numero) >= 62);
+    prepararAudio([...textoOriginal, ...continuacion]);
     const cont = document.getElementById('catalogReaderPages');
 
     if (!cont) return;
