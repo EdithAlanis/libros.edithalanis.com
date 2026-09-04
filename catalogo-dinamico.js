@@ -342,7 +342,7 @@
 
     if (!cont) return;
 
-    let html = `
+    let html = controlesAudio() + `
       <div style="
         padding:16px 18px;
         margin-bottom:22px;
@@ -390,7 +390,7 @@
           </div>
 
           <img
-            src="./${archivo}"
+            src="./${archivo}?v=word-20260903"
             alt="Cuento para Manuel página ${numero}"
             loading="lazy"
             style="
@@ -402,6 +402,7 @@
               background:white;
               box-shadow:0 5px 18px rgba(0,0,0,.15);
             ">
+          <div class="sr-only" aria-label="Texto de la página ${numero}">${(textoOriginal.find(x => Number(x.numero) === numero)?.contenido || '').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
 
         </article>
       `;

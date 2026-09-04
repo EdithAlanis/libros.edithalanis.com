@@ -1,0 +1,7 @@
+ACTUALIZACIÓN CUENTO PARA MANUEL - 03/09/2026
+
+1. Las páginas 1 a 61 fueron regeneradas desde el archivo Word "Cuento para Manuel ok grafico 2009(2).docx".
+2. Cada página conserva la composición visual del Word y se muestra página por página.
+3. El texto se extrajo por página desde la misma versión Word y se usa para el lector de voz.
+4. Se agregó el bloque visible de controles del audiolibro en Cuento para Manuel (Escuchar, Pausar, Continuar, Detener y velocidad).
+5. Se agregó versionado de archivos para evitar que el navegador siga mostrando páginas antiguas desde caché.
